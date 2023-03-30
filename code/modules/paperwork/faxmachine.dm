@@ -3,7 +3,7 @@ GLOBAL_LIST_EMPTY(alldepartments)
 
 /obj/machinery/photocopier/faxmachine
 	name = "fax machine"
-	icon = 'whitesands/icons/obj/library.dmi'
+	icon = 'icons/obj/library.dmi'
 	icon_state = "fax"
 	insert_anim = "faxsend"
 	density = FALSE
@@ -44,6 +44,10 @@ GLOBAL_LIST_EMPTY(alldepartments)
 
 	if(!(("[department]" in GLOB.alldepartments) || ("[department]" in admin_departments)) && department != "Unknown")
 		LAZYADD(GLOB.alldepartments, department)
+
+/obj/machinery/photocopier/faxmachine/Destroy()
+	. = ..()
+	GLOB.allfaxes -= src
 
 /obj/machinery/photocopier/faxmachine/longrange
 	name = "long range fax machine"
@@ -126,7 +130,7 @@ GLOBAL_LIST_EMPTY(alldepartments)
 				remove_photocopy(document_copy, usr)
 				document_copy = null
 			else
-				attackby(usr.get_active_held_item(), usr)
+				to_chat(usr, "<span class='notice'>There's nothing in the tray.</span>")
 		if("dept")
 			if(is_authenticated)
 				var/lastdestination = destination
@@ -271,7 +275,7 @@ GLOBAL_LIST_EMPTY(alldepartments)
 
 
 /obj/machinery/photocopier/faxmachine/proc/send_to_admins(mob/sender, faxname, faxtype, obj/item/sent, font_colour="#9A04D1")
-	var/msg = "<span class='boldnotice'><font color='[font_colour]'>[faxname]: </font> [ADMIN_LOOKUP(sender)] | REPLY: [ADMIN_CENTCOM_REPLY(sender)] [ADMIN_FAX(sender, src, faxtype, sent)] [ADMIN_SM(sender)] | REJECT: (<A HREF='?_src_=holder;[HrefToken(TRUE)];FaxReplyTemplate=[REF(sender)];originfax=[REF(src)]'>TEMPLATE</A>) [ADMIN_SMITE(sender)] (<A HREF='?_src_=holder;[HrefToken(TRUE)];EvilFax=[REF(sender)];originfax=[REF(src)]'>EVILFAX</A>) </span>: Receiving '[sent.name]' via secure connection... <a href='?_src_=holder;[HrefToken(TRUE)];AdminFaxView=[REF(sent)]'>view message</a>"
+	var/msg = "<span class='boldnotice'><font color='[font_colour]'>[faxname]: </font> [ADMIN_LOOKUP(sender)] | REPLY: [ADMIN_CENTCOM_REPLY(sender)] [ADMIN_FAX(sender, src, faxtype, sent)] [ADMIN_SM(sender)] | REJECT: (<A HREF='?_src_=holder;[HrefToken(TRUE)];FaxReplyTemplate=[REF(sender)];originfax=[REF(src)]'>TEMPLATE</A>) [ADMIN_SMITE(sender)]</span>: Receiving '[sent.name]' via secure connection... <a href='?_src_=holder;[HrefToken(TRUE)];AdminFaxView=[REF(sent)]'>view message</a>"
 	if(istype(sent, /obj/item/paper))
 		var/obj/item/paper/paper = sent
 		SSredbot.send_discord_message("admin", "New [faxname]  ([paper.name]) Sent by [sender]: [strip_booktext(paper.info, 30)]")

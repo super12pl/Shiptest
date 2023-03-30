@@ -92,8 +92,8 @@ GLOBAL_LIST_INIT(cable_colors, list(
 
 	// ensure d1 & d2 reflect the icon_state for entering and exiting cable
 	var/dash = findtext(icon_state, "-")
-	d1 = text2num( copytext( icon_state, 1, dash ) )
-	d2 = text2num( copytext( icon_state, dash+1 ) )
+	d1 = text2num(copytext(icon_state, 1, dash))
+	d2 = text2num(copytext(icon_state, dash+1))
 
 	AddElement(/datum/element/undertile, TRAIT_T_RAY_VISIBLE)
 
@@ -528,8 +528,8 @@ GLOBAL_LIST_INIT(cable_coil_recipes, list(new/datum/stack_recipe("cable restrain
 	if(cable_colors[cable_color])
 		cable_color = cable_colors[cable_color]
 
-	pixel_x = rand(-2,2)
-	pixel_y = rand(-2,2)
+	pixel_x = base_pixel_x + rand(-2,2)
+	pixel_y = base_pixel_y + rand(-2,2)
 	update_icon()
 	recipes = GLOB.cable_coil_recipes
 
@@ -545,9 +545,9 @@ GLOBAL_LIST_INIT(cable_coil_recipes, list(new/datum/stack_recipe("cable restrain
 		return ..()
 
 	var/obj/item/bodypart/affecting = H.get_bodypart(check_zone(user.zone_selected))
-	if(affecting && affecting.status == BODYPART_ROBOTIC)
+	if(affecting && (!IS_ORGANIC_LIMB(affecting)))
 		if(user == H)
-			user.visible_message("<span class='notice'>[user] starts to fix some of the wires in [H]'s [affecting.name].</span>", "<span class='notice'>You start fixing some of the wires in [H == user ? "your" : "[H]'s"] [affecting.name].</span>")
+			user.visible_message("<span class='notice'>[user] starts to fix some of the wires in [H]'s [parse_zone(affecting.body_zone)].</span>", "<span class='notice'>You start fixing some of the wires in [H == user ? "your" : "[H]'s"] [parse_zone(affecting.body_zone)].</span>")
 			if(!do_mob(user, H, 50))
 				return
 		if(item_heal_robotic(H, user, 0, 15))
@@ -649,7 +649,7 @@ GLOBAL_LIST_INIT(cable_coil_recipes, list(new/datum/stack_recipe("cable restrain
 
 // called when cable_coil is click on an installed obj/cable
 // or click on a turf that already contains a "node" cable
-/obj/item/stack/cable_coil/proc/cable_join(obj/structure/cable/C, mob/user, var/showerror = TRUE, forceddir)
+/obj/item/stack/cable_coil/proc/cable_join(obj/structure/cable/C, mob/user, showerror = TRUE, forceddir)
 	var/turf/U = user.loc
 	if(!isturf(U))
 		return
@@ -734,7 +734,7 @@ GLOBAL_LIST_INIT(cable_coil_recipes, list(new/datum/stack_recipe("cable restrain
 		for(var/obj/structure/cable/LC in T)		// check to make sure there's no matching cable
 			if(LC == C)			// skip the cable we're interacting with
 				continue
-			if((LC.d1 == nd1 && LC.d2 == nd2) || (LC.d1 == nd2 && LC.d2 == nd1) )	// make sure no cable matches either direction
+			if((LC.d1 == nd1 && LC.d2 == nd2) || (LC.d1 == nd2 && LC.d2 == nd1))	// make sure no cable matches either direction
 				if (showerror)
 					to_chat(user, "<span class='warning'>There's already a cable at that position!</span>")
 
@@ -772,6 +772,21 @@ GLOBAL_LIST_INIT(cable_coil_recipes, list(new/datum/stack_recipe("cable restrain
 
 		C.denode()// this call may have disconnected some cables that terminated on the centre of the turf, if so split the powernets.
 		return
+
+/obj/item/stack/cable_coil/attackby(obj/item/item, mob/user, params)
+	. = ..()
+	if(item.tool_behaviour != TOOL_WIRECUTTER)
+		return
+	playsound(src, 'sound/weapons/slice.ogg', 50, TRUE, -1)
+	to_chat(user, "<span class='notice'>You start cutting the insulation off of [src]...</span>")
+	if(!do_after(user, 1 SECONDS, src))
+		return
+	var/obj/item/result = new /obj/item/garnish/wire(drop_location())
+	var/give_to_user = user.is_holding(src)
+	use(1)
+	if(QDELETED(src) && give_to_user)
+		user.put_in_hands(result)
+	to_chat(user, "<span class='notice'>You finish cutting [src]</span>")
 
 //////////////////////////////
 // Misc.

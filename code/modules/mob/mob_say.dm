@@ -4,26 +4,31 @@
 /mob/verb/say_verb(message as text)
 	set name = "Say"
 	set category = "IC"
+	set instant = TRUE
 	if(typing_indicator)
 		set_typing_indicator(FALSE)
 	if(GLOB.say_disabled)	//This is here to try to identify lag problems
 		to_chat(usr, "<span class='danger'>Speech is currently admin-disabled.</span>")
 		return
+	//queue this message because verbs are scheduled to process after SendMaps in the tick and speech is pretty expensive when it happens.
+	//by queuing this for next tick the mc can compensate for its cost instead of having speech delay the start of the next tick
 	if(message)
-		say(message)
+		SSspeech_controller.queue_say_for_mob(src, message, SPEECH_CONTROLLER_QUEUE_SAY_VERB)
 
 ///Whisper verb
 /mob/verb/whisper_verb(message as text)
 	set name = "Whisper"
 	set category = "IC"
+	set instant = TRUE
 	if(GLOB.say_disabled)	//This is here to try to identify lag problems
 		to_chat(usr, "<span class='danger'>Speech is currently admin-disabled.</span>")
 		return
-	whisper(message)
+	if(message)
+		SSspeech_controller.queue_say_for_mob(src, message, SPEECH_CONTROLLER_QUEUE_WHISPER_VERB)
 
 ///whisper a message
 /mob/proc/whisper(message, datum/language/language=null)
-	say(message, language) //only living mobs actually whisper, everything else just talks
+	say(message, language = language) //only living mobs actually whisper, everything else just talks
 
 ///The me emote verb
 /mob/verb/me_verb(message as text)
@@ -37,12 +42,11 @@
 		return
 
 	message = trim(copytext_char(sanitize(message), 1, MAX_MESSAGE_LEN))
-	message = process_chat_markup(message) //WS edit - Chat markup
 
-	usr.emote("me",1,message,TRUE)
+	SSspeech_controller.queue_say_for_mob(src, message, SPEECH_CONTROLLER_QUEUE_EMOTE_VERB)
 
 ///Speak as a dead person (ghost etc)
-/mob/proc/say_dead(var/message)
+/mob/proc/say_dead(message)
 	var/name = real_name
 	var/alt_name = ""
 
@@ -79,7 +83,7 @@
 		if(name != real_name)
 			alt_name = " (died as [real_name])"
 
-	var/spanned = say_quote(message)
+	var/spanned = say_quote(say_emphasis(message))
 	var/source = "<span class='game'><span class='prefix'>DEAD:</span> <span class='name'>[name]</span>[alt_name]"
 	var/rendered = " <span class='message'>[emoji_parse(spanned)]</span></span>"
 	log_talk(message, LOG_SAY, tag="DEAD")
@@ -96,6 +100,18 @@
 		emote(copytext(message, length(message[1]) + 1), intentional = !forced)
 		return TRUE
 
+/mob/proc/check_for_custom_say_emote(message, list/mods)
+	var/customsaypos = findtext(message, "*")
+	if(!customsaypos)
+		return message
+	if (is_banned_from(ckey, "Emote"))
+		return copytext(message, customsaypos + 1)
+	mods[MODE_CUSTOM_SAY_EMOTE] = lowertext(copytext_char(message, 1, customsaypos))
+	message = copytext(message, customsaypos + 1)
+	if (!message)
+		mods[MODE_CUSTOM_SAY_ERASE_INPUT] = TRUE
+		message = "an interesting thing to say"
+	return message
 ///Check if the mob has a hivemind channel
 /mob/proc/hivecheck()
 	return 0
@@ -112,18 +128,18 @@
 ///The amount of items we are looking for in the message
 #define MESSAGE_MODS_LENGTH 6
 /**
-  * Extracts and cleans message of any extenstions at the begining of the message
-  * Inserts the info into the passed list, returns the cleaned message
-  *
-  * Result can be
-  * * SAY_MODE (Things like aliens, channels that aren't channels)
-  * * MODE_WHISPER (Quiet speech)
-  * * MODE_SING (Singing)
-  * * MODE_HEADSET (Common radio channel)
-  * * RADIO_EXTENSION the extension we're using (lots of values here)
-  * * RADIO_KEY the radio key we're using, to make some things easier later (lots of values here)
-  * * LANGUAGE_EXTENSION the language we're trying to use (lots of values here)
-  */
+ * Extracts and cleans message of any extenstions at the begining of the message
+ * Inserts the info into the passed list, returns the cleaned message
+ *
+ * Result can be
+ * * SAY_MODE (Things like aliens, channels that aren't channels)
+ * * MODE_WHISPER (Quiet speech)
+ * * MODE_SING (Singing)
+ * * MODE_HEADSET (Common radio channel)
+ * * RADIO_EXTENSION the extension we're using (lots of values here)
+ * * RADIO_KEY the radio key we're using, to make some things easier later (lots of values here)
+ * * LANGUAGE_EXTENSION the language we're trying to use (lots of values here)
+ */
 /mob/proc/get_message_mods(message, list/mods)
 	for(var/I in 1 to MESSAGE_MODS_LENGTH)
 		// Prevents "...text" from being read as a radio message

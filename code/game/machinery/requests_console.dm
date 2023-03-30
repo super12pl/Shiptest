@@ -26,8 +26,8 @@ GLOBAL_LIST_EMPTY(req_console_ckey_departments)
 
 /obj/machinery/requests_console
 	name = "requests console"
-	desc = "A console intended to send requests to different departments on the station."
-	icon = 'whitesands/icons/obj/terminals.dmi' //WS Edit - Better Icons
+	desc = "A console intended to send requests between different vessels and settlements in a local region."
+	icon = 'icons/obj/terminals.dmi'
 	icon_state = "req_comp0"
 	var/department = "Unknown" //The list of all departments on the station (Determined from this variable on each unit) Set this to the same thing if you want several consoles in one department
 	var/list/messages = list() //List of all messages
@@ -270,7 +270,7 @@ GLOBAL_LIST_EMPTY(req_console_ckey_departments)
 		if(isliving(usr))
 			var/mob/living/L = usr
 			message = L.treat_message(message)
-		minor_announce(message, "[department] Announcement:", from = usr, zlevel = usr.get_virtual_z_level())
+		minor_announce(message, "[department] Announcement:", from = usr, zlevel = usr.virtual_z())
 		GLOB.news_network.SubmitArticle(message, department, "Station Announcements", null)
 		usr.log_talk(message, LOG_SAY, tag="station announcement from [src]")
 		message_admins("[ADMIN_LOOKUPFLW(usr)] has made a station announcement from [src] at [AREACOORD(usr)].")
@@ -284,13 +284,10 @@ GLOBAL_LIST_EMPTY(req_console_ckey_departments)
 			var/radio_freq
 			switch(text2num(href_list["emergency"]))
 				if(REQ_EMERGENCY_SECURITY) //Security
-					radio_freq = FREQ_SECURITY
 					emergency = "Security"
 				if(REQ_EMERGENCY_ENGINEERING) //Engineering
-					radio_freq = FREQ_ENGINEERING
 					emergency = "Engineering"
 				if(REQ_EMERGENCY_MEDICAL) //Medical
-					radio_freq = FREQ_MEDICAL
 					emergency = "Medical"
 			if(radio_freq)
 				Radio.set_frequency(radio_freq)
@@ -300,20 +297,7 @@ GLOBAL_LIST_EMPTY(req_console_ckey_departments)
 
 	if(href_list["send"] && message && to_department && priority)
 
-		var/radio_freq
-		switch(ckey(to_department))
-			if("bridge")
-				radio_freq = FREQ_COMMAND
-			if("medbay")
-				radio_freq = FREQ_MEDICAL
-			if("science")
-				radio_freq = FREQ_SCIENCE
-			if("engineering")
-				radio_freq = FREQ_ENGINEERING
-			if("security")
-				radio_freq = FREQ_SECURITY
-			if("cargobay" || "mining")
-				radio_freq = FREQ_SUPPLY
+		var/radio_freq = FREQ_COMMAND
 
 		var/datum/signal/subspace/messaging/rc/signal = new(src, list(
 			"sender" = department,

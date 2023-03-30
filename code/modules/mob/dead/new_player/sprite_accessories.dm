@@ -16,7 +16,7 @@
 	from doing this unless you absolutely know what you are doing, and have defined a
 	conversion in savefile.dm
 */
-/proc/init_sprite_accessory_subtypes(prototype, list/L, list/male, list/female,var/roundstart = FALSE)//Roundstart argument builds a specific list for roundstart parts where some parts may be locked
+/proc/init_sprite_accessory_subtypes(prototype, list/L, list/male, list/female, roundstart = FALSE)//Roundstart argument builds a specific list for roundstart parts where some parts may be locked
 	if(!istype(L))
 		L = list()
 	if(!istype(male))
@@ -60,6 +60,7 @@
 	var/dimension_y = 32
 	var/center = FALSE	//Should we center the sprite?
 	var/limbs_id // The limbs id supplied for full-body replacing features.
+	var/image_alpha = 255 // The alpha for the accessory to use.
 
 //////////////////////
 // Hair Definitions //
@@ -280,6 +281,14 @@
 	name = "Devil Lock"
 	icon_state = "hair_devilock"
 
+/datum/sprite_accessory/hair/dolorosa
+	name = "Dolorosa"
+	icon_state = "hair_dolorosa"
+
+/datum/sprite_accessory/hair/double
+	name = "Double"
+	icon_state = "hair_double"
+
 /datum/sprite_accessory/hair/doublebun
 	name = "Double Bun"
 	icon_state = "hair_doublebun"
@@ -295,6 +304,14 @@
 /datum/sprite_accessory/hair/drillhairextended
 	name = "Drill Hair (Extended)"
 	icon_state = "hair_drillhairextended"
+
+/datum/sprite_accessory/hair/egg
+	name = "Egg"
+	icon_state = "hair_egg"
+
+/datum/sprite_accessory/hair/eight
+	name = "Eight"
+	icon_state = "hair_eight"
 
 /datum/sprite_accessory/hair/emo
 	name = "Emo"
@@ -368,6 +385,10 @@
 	name = "Half-shaved"
 	icon_state = "hair_halfshaved"
 
+/datum/sprite_accessory/hair/harley
+	name = "Harley"
+	icon_state = "hair_harley"
+
 /datum/sprite_accessory/hair/hedgehog
 	name = "Hedgehog Hair"
 	icon_state = "hair_hedgehog"
@@ -403,6 +424,10 @@
 /datum/sprite_accessory/hair/Joestar
 	name = "Joestar"
 	icon_state = "hair_joestar"
+
+/datum/sprite_accessory/hair/justice
+	name = "Justice"
+	icon_state = "hair_justice"
 
 /datum/sprite_accessory/hair/keanu
 	name = "Keanu Hair"
@@ -444,13 +469,25 @@
 	name = "Long Side Part"
 	icon_state = "hair_longsidepart"
 
+/datum/sprite_accessory/hair/manime
+	name = "Manime"
+	icon_state = "hair_manime"
+
 /datum/sprite_accessory/hair/megaeyebrows
 	name = "Mega Eyebrows"
 	icon_state = "hair_megaeyebrows"
 
+/datum/sprite_accessory/hair/meow
+	name = "Meow"
+	icon_state = "hair_meow"
+
 /datum/sprite_accessory/hair/messy
 	name = "Messy"
 	icon_state = "hair_messy"
+
+/datum/sprite_accessory/hair/miracles
+	name = "Miracles"
+	icon_state = "hair_miracles"
 
 /datum/sprite_accessory/hair/modern
 	name = "Modern"
@@ -604,6 +641,14 @@
 	name = "Poofy"
 	icon_state = "hair_poofy"
 
+/datum/sprite_accessory/hair/prince
+	name = "Prince"
+	icon_state = "hair_prince"
+
+/datum/sprite_accessory/hair/pupa
+	name = "Pupa"
+	icon_state = "hair_pupa"
+
 /datum/sprite_accessory/hair/quiff
 	name = "Quiff"
 	icon_state = "hair_quiff"
@@ -611,6 +656,10 @@
 /datum/sprite_accessory/hair/ronin
 	name = "Ronin"
 	icon_state = "hair_ronin"
+
+/datum/sprite_accessory/hair/rosemary
+	name = "Rosemary"
+	icon_state = "hair_rosemary"
 
 /datum/sprite_accessory/hair/shaved
 	name = "Shaved"
@@ -688,6 +737,10 @@
 	name = "Spiky 3"
 	icon_state = "hair_spiky2"
 
+/datum/sprite_accessory/hair/stride
+	name = "Stride"
+	icon_state = "hair_stride"
+
 /datum/sprite_accessory/hair/swept
 	name = "Swept Back Hair"
 	icon_state = "hair_swept"
@@ -707,6 +760,10 @@
 /datum/sprite_accessory/hair/thinningrear
 	name = "Thinning (Rear)"
 	icon_state = "hair_thinningrear"
+
+/datum/sprite_accessory/hair/thresh
+	name = "Thresh"
+	icon_state = "hair_thresh"
 
 /datum/sprite_accessory/hair/topknot
 	name = "Topknot"
@@ -1686,10 +1743,6 @@
 	name = "Dark Tiger"
 	icon_state = "dtiger"
 
-/datum/sprite_accessory/tails/lizard/ltiger
-	name = "Light Tiger"
-	icon_state = "ltiger"
-
 /datum/sprite_accessory/tails_animated/lizard/ltiger
 	name = "Light Tiger"
 	icon_state = "ltiger"
@@ -1722,13 +1775,15 @@
 
 /datum/sprite_accessory/tails/human/cat/slime
 	name = "Slimecat"
-	icon_state = "catslime"
+	icon_state = "cat"
 	color_src = HAIR
+	image_alpha = 150
 
 /datum/sprite_accessory/tails_animated/human/cat/slime
 	name = "Slimecat"
-	icon_state = "catslime"
+	icon_state = "cat"
 	color_src = HAIR
+	image_alpha = 150
 
 /datum/sprite_accessory/snouts
 	icon = 'icons/mob/mutant_bodyparts.dmi'
@@ -1791,9 +1846,10 @@
 
 /datum/sprite_accessory/ears/cat/slime
 	name = "Slimecat"
-	icon_state = "catslime"
-	hasinner = 1
+	icon_state = "cat"
+	hasinner = FALSE
 	color_src = HAIR
+	image_alpha = 150
 
 /datum/sprite_accessory/wings/none
 	name = "None"
@@ -1962,7 +2018,7 @@
 	icon_state = "round"
 
 /datum/sprite_accessory/moth_wings
-	icon = 'whitesands/icons/mob/moth_wings.dmi'
+	icon = 'icons/mob/moth_wings.dmi'
 	color_src = null
 
 /datum/sprite_accessory/moth_wings/plain
@@ -2110,7 +2166,7 @@
 
 //Moth fluff
 /datum/sprite_accessory/moth_fluff
-	icon = 'whitesands/icons/mob/moth_wings.dmi'
+	icon = 'icons/mob/moth_wings.dmi'
 	color_src = null
 
 /datum/sprite_accessory/moth_fluff/plain
@@ -2207,15 +2263,27 @@
 	icon = 'icons/mob/ipc_accessories.dmi'
 	color_src = EYECOLOR
 
+/datum/sprite_accessory/ipc_screens/blank
+	name = "Blank Canvas"
+	icon_state = "blank"
+
 /datum/sprite_accessory/ipc_screens/blue
 	name = "Blue"
 	icon_state = "blue"
 	color_src = 0
 
+/datum/sprite_accessory/ipc_screens/blush
+	name = "Blush"
+	icon_state = "blush"
+
 /datum/sprite_accessory/ipc_screens/bsod
 	name = "BSOD"
 	icon_state = "bsod"
 	color_src = 0
+
+/datum/sprite_accessory/ipc_screens/buffering
+	name = "Buffering"
+	icon_state = "buffering"
 
 /datum/sprite_accessory/ipc_screens/breakout
 	name = "Breakout"
@@ -2224,6 +2292,10 @@
 /datum/sprite_accessory/ipc_screens/console
 	name = "Console"
 	icon_state = "console"
+
+/datum/sprite_accessory/ipc_screens/doom
+	name = "DOOM"
+	icon_state = "doom"
 
 /datum/sprite_accessory/ipc_screens/ecgwave
 	name = "ECG Wave"
@@ -2234,8 +2306,16 @@
 	icon_state = "eight"
 
 /datum/sprite_accessory/ipc_screens/eyes
-	name = "Eyes"
+	name = "Eyes (Spinny)"
 	icon_state = "eyes"
+
+/datum/sprite_accessory/ipc_screens/eyes_noanim
+	name = "Eyes (No Spinny)"
+	icon_state = "eyes_noanim"
+
+/datum/sprite_accessory/ipc_screens/eyes_fortuna
+	name = "Eyes (Sun and Moon)"
+	icon_state = "eyes_fortuna"
 
 /datum/sprite_accessory/ipc_screens/glider
 	name = "Glider"
@@ -2257,6 +2337,10 @@
 /datum/sprite_accessory/ipc_screens/monoeye
 	name = "Mono-eye"
 	icon_state = "monoeye"
+
+/datum/sprite_accessory/ipc_screens/nyaru
+	name = "Nyaru"
+	icon_state = "nyaru"
 
 /datum/sprite_accessory/ipc_screens/nature
 	name = "Nature"
@@ -2283,10 +2367,9 @@
 	name = "Red"
 	icon_state = "red"
 
-/datum/sprite_accessory/ipc_screens/redtext
-	name = "Red Text"
-	icon_state = "redtext"
-	color_src = 0
+/datum/sprite_accessory/ipc_screens/text
+	name = "Text Lines"
+	icon_state = "text"
 
 /datum/sprite_accessory/ipc_screens/rgb
 	name = "RGB"
@@ -2336,6 +2419,10 @@
 	name = "Tetris"
 	icon_state = "tetris"
 
+/datum/sprite_accessory/ipc_screens/bubbles
+	name = "Bubbles"
+	icon_state = "bubbles"
+
 /datum/sprite_accessory/ipc_screens/tv
 	name = "Color Test"
 	icon_state = "tv"
@@ -2368,10 +2455,6 @@
 	name = "Drone Eyes"
 	icon_state = "droneeyes"
 
-/datum/sprite_accessory/ipc_antennas/light
-	name = "Light"
-	icon_state = "light"
-
 /datum/sprite_accessory/ipc_antennas/sidelights
 	name = "Sidelights"
 	icon_state = "sidelights"
@@ -2384,13 +2467,33 @@
 	name = "TV Antenna"
 	icon_state = "tvantennae"
 
+/datum/sprite_accessory/ipc_antennas/cross
+	name = "Cross"
+	icon_state = "cross"
+
+/datum/sprite_accessory/ipc_antennas/sidepanels
+	name = "Side Panels"
+	icon_state = "sidepanels"
+
+/datum/sprite_accessory/ipc_antennas/horns
+	name = "Horns"
+	icon_state = "horns"
+
+/datum/sprite_accessory/ipc_antennas/langle
+	name = "Left Angle"
+	icon_state = "langle"
+
+/datum/sprite_accessory/ipc_antennas/rangle
+	name = "Right Angle"
+	icon_state = "rangle"
+
 /datum/sprite_accessory/ipc_chassis // Used for changing limb icons, doesn't need to hold the actual icon. That's handled in ipc.dm
 	icon = null
 	icon_state = "who cares fuck you" // In order to pull the chassis correctly, we need AN icon_state(see line 36-39). It doesn't have to be useful, because it isn't used.
 	color_src = 0
 
 /datum/sprite_accessory/ipc_chassis/mcgreyscale
-	name = "Morpheus Cyberkinetics(Greyscale)"
+	name = "Morpheus Cyberkinetics (Custom)"
 	limbs_id = "mcgipc"
 	color_src = MUTCOLORS
 
@@ -2409,6 +2512,10 @@
 /datum/sprite_accessory/ipc_chassis/hephaestussindustries2
 	name = "Hephaestus Industries 2.0"
 	limbs_id = "hi2ipc"
+
+/datum/sprite_accessory/ipc_chassis/pawsitronsunited
+	name = "Pawsitrons United"
+	limbs_id = "pawsitrons"
 
 /datum/sprite_accessory/ipc_chassis/shellguardmunitions
 	name = "Shellguard Munitions Standard Series"
@@ -2431,7 +2538,7 @@
 	limbs_id = "zhpipc"
 
 /datum/sprite_accessory/spider_legs
-	icon = 'whitesands/icons/mob/spider_legs.dmi'
+	icon = 'icons/mob/species/rachnid/spider_legs.dmi'
 	color_src = MUTCOLORS
 
 /datum/sprite_accessory/spider_legs/plain
@@ -2447,7 +2554,7 @@
 	icon_state = "spiky"
 
 /datum/sprite_accessory/spider_spinneret
-	icon = 'whitesands/icons/mob/spider_spinneret.dmi'
+	icon = 'icons/mob/species/rachnid/spider_spinneret.dmi'
 	color_src = MUTCOLORS
 
 /datum/sprite_accessory/spider_spinneret/plain
@@ -2463,7 +2570,7 @@
 	icon_state = "blackwidow"
 
 /datum/sprite_accessory/spider_mandibles
-	icon = 'whitesands/icons/mob/spider_mandibles.dmi'
+	icon = 'icons/mob/species/rachnid/spider_mandibles.dmi'
 	color_src = MUTCOLORS
 
 /datum/sprite_accessory/spider_mandibles/plain
@@ -2478,78 +2585,327 @@
 	name = "Spiky"
 	icon_state = "spiky"
 
-/datum/sprite_accessory/teshari_feathers
-	color_src = HAIR
-	icon = 'icons/mob/teshari_parts.dmi'
+//Kepori
 
-/datum/sprite_accessory/teshari_feathers/none
+/datum/sprite_accessory/kepori_feathers
+	color_src = HAIR
+	icon = 'icons/mob/kepori_parts.dmi'
+
+/datum/sprite_accessory/kepori_feathers/none
 	name = "None"
 
-/datum/sprite_accessory/teshari_feathers/plain
-	name = "Plain"
-	icon_state = "plain"
+/datum/sprite_accessory/kepori_feathers/sleek
+	name = "Sleek"
+	icon_state = "sleek"
 
-/datum/sprite_accessory/teshari_feathers/spiky
-	name = "Spiky"
-	icon_state = "spiky"
+/datum/sprite_accessory/kepori_feathers/peel
+	name = "The Peel"
+	icon_state = "peel"
 
-/datum/sprite_accessory/teshari_feathers/bushy
-	name = "Bushy"
-	icon_state = "bushy"
+/datum/sprite_accessory/kepori_feathers/sweep
+	name = "Swept Up"
+	icon_state = "sweep"
 
-/datum/sprite_accessory/teshari_feathers/mohawk
+/datum/sprite_accessory/kepori_feathers/aerodynamic
+	name = "Aerodynamic"
+	icon_state = "aerodynamic"
+
+/datum/sprite_accessory/kepori_feathers/mohawk
+	name = "Mo-Hawk"
+	icon_state = "mohawk"
+
+/datum/sprite_accessory/kepori_feathers/cowlick
+	name = "Cow-lick"
+	icon_state = "cowlick"
+
+/datum/sprite_accessory/kepori_feathers/spikey
+	name = "Spikey"
+	icon_state = "spikey"
+
+/datum/sprite_accessory/kepori_feathers/soap
+	name = "Soap"
+	icon_state = "soap"
+
+/datum/sprite_accessory/kepori_feathers/crowned
+	name = "Crowned"
+	icon_state = "crowned"
+
+/datum/sprite_accessory/kepori_feathers/crested
+	name = "Crested"
+	icon_state = "crested"
+
+/datum/sprite_accessory/kepori_feathers/ponytail
+	name = "Ponytail"
+	icon_state = "ponytail"
+
+/datum/sprite_accessory/kepori_feathers/bun
+	name = "Bun"
+	icon_state = "bun"
+
+/datum/sprite_accessory/kepori_body_feathers
+	color_src = FACEHAIR
+	icon = 'icons/mob/kepori_parts.dmi'
+
+/datum/sprite_accessory/kepori_body_feathers/none
+	name = "None"
+
+/datum/sprite_accessory/kepori_body_feathers/aftik
+	name = "Aftik"
+	icon_state = "aftik"
+
+/datum/sprite_accessory/kepori_body_feathers/belly
+	name = "Belly"
+	icon_state = "belly"
+
+/datum/sprite_accessory/kepori_body_feathers/shirt
+	name = "Shirt"
+	icon_state = "shirt"
+
+/datum/sprite_accessory/kepori_body_feathers/soap
+	name = "Soap"
+	icon_state = "soap"
+
+/datum/sprite_accessory/kepori_body_feathers/wings
+	name = "Wings"
+	icon_state = "wings"
+
+/datum/sprite_accessory/kepori_tail_feathers
+	color_src = FACEHAIR
+	icon = 'icons/mob/kepori_parts.dmi'
+
+/datum/sprite_accessory/kepori_tail_feathers/none
+	name = "None"
+
+/datum/sprite_accessory/kepori_tail_feathers/fan
+	name = "Fan"
+	icon_state = "fan"
+
+/datum/sprite_accessory/kepori_tail_feathers/back
+	name = "Back"
+	icon_state = "back"
+
+/datum/sprite_accessory/kepori_tail_feathers/fanback
+	name = "Fan and Back"
+	icon_state = "fanback"
+
+/datum/sprite_accessory/kepori_tail_feathers/prosthetic
+	name = "Prosthetic Tail"
+	icon_state = "prosthetic"
+	color_src = null
+
+// Moth
+
+/datum/sprite_accessory/moth_wings/brown
+	name = "Brown"
+	icon_state = "brown"
+
+/datum/sprite_accessory/moth_wings/feathery
+	name = "Feathery"
+	icon_state = "feathery"
+
+/datum/sprite_accessory/moth_wings/rosy
+	name = "Rosy"
+	icon_state = "rosy"
+
+/datum/sprite_accessory/moth_wings/plasmafire
+	name = "Plasmafire"
+	icon_state = "plasmafire"
+
+/datum/sprite_accessory/moth_fluff/brown
+	name = "Brown"
+	icon_state = "brown"
+
+/datum/sprite_accessory/moth_fluff/feathery
+	name = "Feathery"
+	icon_state = "feathery"
+
+/datum/sprite_accessory/moth_fluff/rosy
+	name = "Rosy"
+	icon_state = "rosy"
+
+/datum/sprite_accessory/moth_fluff/plasmafire
+	name = "Plasmafire"
+	icon_state = "plasmafire"
+
+//Vox
+
+/datum/sprite_accessory/vox_head_quills
+	icon = 'icons/mob/species/vox/vox_quills.dmi'
+	color_src = null
+
+/datum/sprite_accessory/vox_head_quills/none
+	name = "None"
+
+/datum/sprite_accessory/vox_head_quills/wildflower
+	name = "Wildflower"
+	icon_state = "wildflower"
+
+/datum/sprite_accessory/vox_head_quills/augmenter
+	name = "Augmenter"
+	icon_state = "augmenter"
+
+/datum/sprite_accessory/vox_head_quills/shaggy
+	name = "Shaggy"
+	icon_state = "shaggy"
+
+/datum/sprite_accessory/vox_head_quills/mange
+	name = "Mange"
+	icon_state = "mange"
+
+/datum/sprite_accessory/vox_head_quills/ponytail
+	name = "Ponytail"
+	icon_state = "ponytail"
+
+/datum/sprite_accessory/vox_head_quills/rows
+	name = "Rows"
+	icon_state = "rows"
+
+/datum/sprite_accessory/vox_head_quills/cropped
+	name = "Cropped"
+	icon_state = "cropped"
+
+/datum/sprite_accessory/vox_head_quills/surf
+	name = "Surf"
+	icon_state = "surf"
+
+/datum/sprite_accessory/vox_head_quills/nights
+	name = "Nights"
+	icon_state = "nights"
+
+/datum/sprite_accessory/vox_head_quills/horns
+	name = "Horns"
+	icon_state = "horns"
+
+/datum/sprite_accessory/vox_head_quills/longhawk
+	name = "Longhawk"
+	icon_state = "longhawk"
+
+/datum/sprite_accessory/vox_head_quills/mohawk
 	name = "Mohawk"
 	icon_state = "mohawk"
 
-/datum/sprite_accessory/teshari_feathers/pointy
-	name = "Pointy"
-	icon_state = "pointy"
+/datum/sprite_accessory/vox_head_quills/yasu
+	name = "Yasu"
+	icon_state = "yasu"
 
-/datum/sprite_accessory/teshari_feathers/upright
-	name = "Upright"
-	icon_state = "upright"
+/datum/sprite_accessory/vox_head_quills/afro
+	name = "Afro"
+	icon_state = "afro"
 
-/datum/sprite_accessory/teshari_feathers/mane
-	name = "Mane"
-	icon_state = "mane"
+/datum/sprite_accessory/vox_head_quills/kingly
+	name = "Kingly"
+	icon_state = "kingly"
 
-/datum/sprite_accessory/teshari_feathers/droopy
-	name = "Droopy"
-	icon_state = "droopy"
+/datum/sprite_accessory/vox_head_quills/shortquills
+	name = "Short Quills"
+	icon_state = "shortquills"
 
-/datum/sprite_accessory/teshari_feathers/mushroom
-	name = "Mushroom"
-	icon_state = "mushroom"
+/datum/sprite_accessory/vox_neck_quills
+	icon = 'icons/mob/species/vox/vox_quills.dmi'
+	color_src = null
 
-/datum/sprite_accessory/teshari_feathers/backstrafe
-	name = "Backstrafe"
-	icon_state = "backstrafe"
+/datum/sprite_accessory/vox_neck_quills/none
+	name = "None"
 
-/datum/sprite_accessory/teshari_feathers/longway
-	name = "Longway"
-	icon_state = "longway"
+/datum/sprite_accessory/vox_neck_quills/beard
+	name = "Beard"
+	icon_state = "beard"
 
-/datum/sprite_accessory/teshari_feathers/tree
-	name = "Tree"
-	icon_state = "tree"
+/datum/sprite_accessory/vox_neck_quills/fuu
+	name = "Fuu"
+	icon_state = "fuu"
 
-/datum/sprite_accessory/teshari_feathers/thin_mohawk
-	name = "Thin Mohawk"
-	icon_state = "thinmohawk"
+/datum/sprite_accessory/vox_neck_quills/colonal
+	name = "Colonal"
+	icon_state = "colonal"
 
-/datum/sprite_accessory/teshari_feathers/twies
-	name = "Twies"
-	icon_state = "twies"
-
-/datum/sprite_accessory/teshari_body_feathers
-	color_src = FACEHAIR
-	icon = 'icons/mob/teshari_parts.dmi'
-
-/datum/sprite_accessory/teshari_body_feathers/plain
+/datum/sprite_accessory/vox_neck_quills/plain
 	name = "Plain"
 	icon_state = "plain"
 
-/datum/sprite_accessory/teshari_body_feathers/none
-	name = "None"
+/datum/sprite_accessory/vox_neck_quills/tailfeather
+	name = "Tailfeather"
+	icon_state = "tailfeather"
 
-//ENDWS
+/datum/sprite_accessory/vox_neck_quills/ruffbeard
+	name = "Ruffbeard"
+	icon_state = "ruffbeard"
+
+/datum/sprite_accessory/vox_neck_quills/ruffhawk
+	name = "Ruffhawk"
+	icon_state = "ruffhawk"
+
+//Elzuosa help
+
+/datum/sprite_accessory/elzu_horns
+	icon = 'icons/mob/ethereal_parts.dmi'
+
+/datum/sprite_accessory/elzu_horns/none
+	name = "None"
+	icon_state = "none"
+
+/datum/sprite_accessory/elzu_horns/short
+	name = "Short"
+	icon_state = "short"
+
+/datum/sprite_accessory/elzu_horns/helm
+	name = "Helm"
+	icon_state = "helm"
+
+/datum/sprite_accessory/elzu_horns/lunar
+	name = "Lunar"
+	icon_state = "lunar"
+
+/datum/sprite_accessory/elzu_horns/inward
+	name = "Inward"
+	icon_state = "inward"
+
+/datum/sprite_accessory/elzu_horns/majesty
+	name = "Majesty"
+	icon_state = "majesty"
+
+/datum/sprite_accessory/elzu_horns/clipped
+	name = "Clipped"
+	icon_state = "clipped"
+
+/datum/sprite_accessory/elzu_horns/sharp
+	name = "Sharp"
+	icon_state = "sharp"
+
+/datum/sprite_accessory/tails/elzu
+	icon = 'icons/mob/ethereal_parts.dmi'
+
+/datum/sprite_accessory/tails_animated/elzu
+	icon = 'icons/mob/ethereal_parts.dmi'
+
+/datum/sprite_accessory/tails/elzu/none
+	name = "None"
+	icon_state = "none"
+
+/datum/sprite_accessory/tails_animated/elzu/none
+	name = "None"
+	icon_state = "none"
+
+/datum/sprite_accessory/tails/elzu/long
+	name = "Long"
+	icon_state = "long"
+
+/datum/sprite_accessory/tails_animated/elzu/long
+	name = "Long"
+	icon_state = "long"
+
+/datum/sprite_accessory/tails/elzu/bifurcated
+	name = "Bifurcated"
+	icon_state = "bifurcated"
+
+/datum/sprite_accessory/tails_animated/elzu/bifurcated
+	name = "Bifurcated"
+	icon_state = "bifurcated"
+
+/datum/sprite_accessory/tails/elzu/stubby
+	name = "Stubby"
+	icon_state = "stubby"
+
+/datum/sprite_accessory/tails_animated/elzu/stubby
+	name = "Stubby"
+	icon_state = "stubby"

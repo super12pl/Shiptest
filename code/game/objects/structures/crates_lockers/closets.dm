@@ -1,7 +1,7 @@
 /obj/structure/closet
 	name = "closet"
 	desc = "It's a basic storage unit."
-	icon = 'goon/icons/obj/closet.dmi'
+	icon = 'icons/obj/closet.dmi'
 	icon_state = "generic"
 	density = TRUE
 	drag_slowdown = 1.5		// Same as a prone mob
@@ -145,7 +145,7 @@
 
 /obj/structure/closet/dump_contents()
 	var/atom/L = drop_location()
-	for(var/atom/movable/AM in src)
+	for(var/atom/movable/AM as anything in src)
 		AM.forceMove(L)
 		if(throwing) // you keep some momentum when getting out of a thrown closet
 			step(AM, dir)
@@ -425,7 +425,7 @@
 		"<span class='notice'>You lean on the back of [src] and start pushing the door open... (this will take about [DisplayTimeText(breakout_time)].)</span>", \
 		"<span class='hear'>You hear banging from [src].</span>")
 	if(do_after(user,(breakout_time), target = src))
-		if(!user || user.stat != CONSCIOUS || user.loc != src || opened || (!locked && !welded) )
+		if(!user || user.stat != CONSCIOUS || user.loc != src || opened || (!locked && !welded))
 			return
 		//we check after a while whether there is a point of resisting anymore and whether the user is capable of resisting
 		user.visible_message("<span class='danger'>[user] successfully broke out of [src]!</span>",
@@ -491,8 +491,8 @@
 	if(. & EMP_PROTECT_SELF)
 		return
 	if (!(. & EMP_PROTECT_CONTENTS))
-		for(var/obj/O in src)
-			O.emp_act(severity)
+		for(var/atom/movable/AM as anything in src)
+			AM.emp_act(severity)
 	if(secure && !broken && !(. & EMP_PROTECT_SELF))
 		if(prob(50 / severity))
 			locked = !locked
@@ -546,7 +546,7 @@
 		togglelock(user)
 		T1.visible_message("<span class='warning'>[user] dives into [src]!</span>")
 
-/obj/structure/closet/on_object_saved(var/depth = 0)
+/obj/structure/closet/on_object_saved(depth = 0)
 	if(depth >= 10)
 		return ""
 	var/dat = ""

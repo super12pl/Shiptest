@@ -137,8 +137,8 @@
 	if(buckled)
 		buckled.unbuckle_mob(src,force=1)
 	buckled = null
-	pixel_x = initial(pixel_x)
-	pixel_y = initial(pixel_y)
+	pixel_x = base_pixel_x
+	pixel_y = base_pixel_y
 
 	..(gibbed)
 
@@ -235,7 +235,7 @@
 					if(!item_to_add)
 						return
 
-					if( !istype(item_to_add,  /obj/item/radio/headset) )
+					if(!istype(item_to_add,  /obj/item/radio/headset))
 						to_chat(usr, "<span class='warning'>This object won't fit!</span>")
 						return
 
@@ -249,20 +249,20 @@
 					available_channels.Cut()
 					for(var/ch in headset_to_add.channels)
 						switch(ch)
-							if(RADIO_CHANNEL_ENGINEERING)
-								available_channels.Add(RADIO_TOKEN_ENGINEERING)
+							if(RADIO_CHANNEL_NANOTRASEN)
+								available_channels.Add(RADIO_TOKEN_NANOTRASEN)
 							if(RADIO_CHANNEL_COMMAND)
 								available_channels.Add(RADIO_TOKEN_COMMAND)
-							if(RADIO_CHANNEL_SECURITY)
-								available_channels.Add(RADIO_TOKEN_SECURITY)
-							if(RADIO_CHANNEL_SCIENCE)
-								available_channels.Add(RADIO_TOKEN_SCIENCE)
-							if(RADIO_CHANNEL_MEDICAL)
-								available_channels.Add(RADIO_TOKEN_MEDICAL)
-							if(RADIO_CHANNEL_SUPPLY)
-								available_channels.Add(RADIO_TOKEN_SUPPLY)
-							if(RADIO_CHANNEL_SERVICE)
-								available_channels.Add(RADIO_TOKEN_SERVICE)
+							if(RADIO_CHANNEL_MINUTEMEN)
+								available_channels.Add(RADIO_TOKEN_MINUTEMEN)
+							if(RADIO_CHANNEL_INTEQ)
+								available_channels.Add(RADIO_TOKEN_INTEQ)
+							if(RADIO_CHANNEL_SOLGOV)
+								available_channels.Add(RADIO_TOKEN_SOLGOV)
+							if(RADIO_CHANNEL_SYNDICATE)
+								available_channels.Add(RADIO_TOKEN_SYNDICATE)
+							if(RADIO_CHANNEL_PIRATE)
+								available_channels.Add(RADIO_TOKEN_PIRATE)
 
 					if(headset_to_add.translate_binary)
 						available_channels.Add(MODE_TOKEN_BINARY)
@@ -371,8 +371,8 @@
 			buckled = null
 		icon_state = icon_living
 		parrot_state = PARROT_WANDER
-		pixel_x = initial(pixel_x)
-		pixel_y = initial(pixel_y)
+		pixel_x = base_pixel_x
+		pixel_y = base_pixel_y
 		return
 
 
@@ -813,8 +813,8 @@
 	if(. && !stat && client && parrot_state == PARROT_PERCH)
 		parrot_state = PARROT_WANDER
 		icon_state = icon_living
-		pixel_x = initial(pixel_x)
-		pixel_y = initial(pixel_y)
+		pixel_x = base_pixel_x
+		pixel_y = base_pixel_y
 
 /mob/living/simple_animal/parrot/proc/perch_mob_player()
 	set name = "Sit on Human's Shoulder"
@@ -838,8 +838,8 @@
 			to_chat(src, "<span class='notice'>You are no longer sitting on [buckled]'s shoulder.</span>")
 			buckled.unbuckle_mob(src, TRUE)
 		buckled = null
-		pixel_x = initial(pixel_x)
-		pixel_y = initial(pixel_y)
+		pixel_x = base_pixel_x
+		pixel_y = base_pixel_y
 
 
 

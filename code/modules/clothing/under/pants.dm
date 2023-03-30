@@ -1,11 +1,12 @@
 /obj/item/clothing/under/pants
 	gender = PLURAL
 	body_parts_covered = GROIN|LEGS
-	fitted = NO_FEMALE_UNIFORM
 	can_adjust = FALSE
 	custom_price = 60
 	icon = 'icons/obj/clothing/under/shorts_pants.dmi'
 	mob_overlay_icon = 'icons/mob/clothing/under/shorts_pants.dmi'
+	greyscale_colors = list(list(14, 10), list(16, 10), list(16, 9))
+	greyscale_icon_state = "pants"
 
 /obj/item/clothing/under/pants/classicjeans
 	name = "classic jeans"
@@ -65,5 +66,5 @@
 
 /obj/item/clothing/under/pants/camo
 	name = "camo pants"
-	desc = "A pair of woodland camouflage pants. Probably not the best choice for a space station."
+	desc = "A pair of woodland camouflage pants. Probably not the best choice for deep space."
 	icon_state = "camopants"

@@ -67,10 +67,10 @@
 		if(player.stat != DEAD && player.loc && !iscultist(player) && !isanimal(player))
 			souls_needed[player] = TRUE
 	soul_goal = round(1 + LAZYLEN(souls_needed) * 0.75)
-	SSredbot.send_discord_message("admin","Nar'sie has been summoned.","round ending event")
 	INVOKE_ASYNC(GLOBAL_PROC, .proc/begin_the_end)
 
 /proc/begin_the_end()
+	SSredbot.send_discord_message("admin","Nar'sie has been summoned.","round ending event")
 	sleep(50)
 	if(QDELETED(GLOB.cult_narsie)) // uno
 		priority_announce("Status report? We detected a anomaly, but it disappeared almost immediately.","Central Command Higher Dimensional Affairs", 'sound/misc/notice1.ogg')
@@ -122,7 +122,7 @@
 /proc/ending_helper()
 	SSticker.force_ending = 1
 
-/proc/cult_ending_helper(var/ending_type = 0)
+/proc/cult_ending_helper(ending_type = 0)
 	if(ending_type == 2) //narsie fukkin died
 		Cinematic(CINEMATIC_CULT_FAIL,world,CALLBACK(GLOBAL_PROC,/proc/ending_helper))
 	else if(ending_type) //no explosion
@@ -173,7 +173,7 @@
 
 	for(var/mob/living/carbon/food in GLOB.alive_mob_list) //we don't care about constructs or cult-Ians or whatever. cult-monkeys are fair game i guess
 		var/turf/pos = get_turf(food)
-		if(!pos || (pos.get_virtual_z_level() != get_virtual_z_level()))
+		if(!pos || (pos.virtual_z() != virtual_z()))
 			continue
 
 		if(iscultist(food))
@@ -192,7 +192,7 @@
 	//no living humans, follow a ghost instead.
 	for(var/mob/dead/observer/ghost in GLOB.player_list)
 		var/turf/pos = get_turf(ghost)
-		if(!pos || (pos.get_virtual_z_level() != get_virtual_z_level()))
+		if(!pos || (pos.virtual_z() != virtual_z()))
 			continue
 		cultists += ghost
 	if(cultists.len)

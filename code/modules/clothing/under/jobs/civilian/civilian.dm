@@ -1,8 +1,8 @@
 //Alphabetical order of civilian jobs.
 
 /obj/item/clothing/under/rank/civilian
-	icon = 'icons/obj/clothing/under/civilian.dmi'
-	mob_overlay_icon = 'icons/mob/clothing/under/civilian.dmi'
+	icon = 'icons/obj/clothing/under/service.dmi'
+	mob_overlay_icon = 'icons/mob/clothing/under/service.dmi'
 
 /obj/item/clothing/under/rank/civilian/bartender
 	desc = "It looks like it could use some more flair."
@@ -24,7 +24,7 @@
 	item_state = "bar_suit"
 	body_parts_covered = CHEST|GROIN|ARMS
 	can_adjust = FALSE
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/rank/civilian/chaplain
 	desc = "It's a black jumpsuit, often worn by religious folk."
@@ -40,7 +40,7 @@
 	item_state = "bl_suit"
 	body_parts_covered = CHEST|GROIN|ARMS
 	can_adjust = FALSE
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/rank/civilian/chef
 	name = "cook's suit"
@@ -54,9 +54,7 @@
 	icon_state = "chef_skirt"
 	body_parts_covered = CHEST|GROIN|ARMS
 	can_adjust = FALSE
-	fitted = FEMALE_UNIFORM_TOP
-
-/*WS Begin - Better Command Uniforms (see whitesands\code\modules\clothing\under\jobs\civilian\civilian.dm)
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/rank/command/head_of_personnel
 	desc = "It's a jumpsuit worn by someone who works in the position of \"Head of Personnel\"."
@@ -72,7 +70,6 @@
 	item_state = "b_suit"
 	body_parts_covered = CHEST|GROIN|ARMS
 	can_adjust = FALSE
-	fitted = FEMALE_UNIFORM_TOP
 
 /obj/item/clothing/under/rank/command/head_of_personnel/suit
 	name = "head of personnel's suit"
@@ -88,9 +85,6 @@
 	item_state = "g_suit"
 	body_parts_covered = CHEST|GROIN|ARMS
 	can_adjust = FALSE
-	fitted = FEMALE_UNIFORM_TOP
-
-WS End */
 
 /obj/item/clothing/under/rank/civilian/hydroponics
 	desc = "It's a jumpsuit designed to protect against minor plant-related hazards."
@@ -106,21 +100,21 @@ WS End */
 	item_state = "g_suit"
 	body_parts_covered = CHEST|GROIN|ARMS
 	can_adjust = FALSE
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/rank/civilian/janitor
-	desc = "It's the official uniform of the station's janitor. It has minor protection from biohazards."
+	desc = "It's the official uniform of a space janitor. It has minor protection from biohazards."
 	name = "janitor's jumpsuit"
 	icon_state = "janitor"
 	armor = list("melee" = 0, "bullet" = 0, "laser" = 0,"energy" = 0, "bomb" = 0, "bio" = 10, "rad" = 0, "fire" = 0, "acid" = 0)
 
 /obj/item/clothing/under/rank/civilian/janitor/skirt
 	name = "janitor's jumpskirt"
-	desc = "It's the official skirt of the station's janitor. It has minor protection from biohazards."
+	desc = "It's the official skirt of a space janitor. It has minor protection from biohazards."
 	icon_state = "janitor_skirt"
 	body_parts_covered = CHEST|GROIN|ARMS
 	can_adjust = FALSE
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/rank/civilian/janitor/maid
 	name = "maid uniform"
@@ -128,7 +122,6 @@ WS End */
 	icon_state = "janimaid"
 	item_state = "janimaid"
 	body_parts_covered = CHEST|GROIN
-	fitted = FEMALE_UNIFORM_TOP
 	can_adjust = FALSE
 
 /obj/item/clothing/under/rank/civilian/lawyer
@@ -151,7 +144,7 @@ WS End */
 	name = "lawyer black suitskirt"
 	icon_state = "lawyer_black_skirt"
 	item_state = "lawyer_black"
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/rank/civilian/lawyer/female
 	name = "female black suit"
@@ -164,7 +157,7 @@ WS End */
 	icon_state = "black_suit_fem_skirt"
 	item_state = "black_suit_fem_skirt"
 	mob_overlay_icon = 'icons/mob/clothing/under/suits.dmi'
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/rank/civilian/lawyer/red
 	name = "lawyer red suit"
@@ -175,7 +168,7 @@ WS End */
 	name = "lawyer red suitskirt"
 	icon_state = "lawyer_red_skirt"
 	item_state = "lawyer_red"
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/rank/civilian/lawyer/blue
 	name = "lawyer blue suit"
@@ -186,7 +179,7 @@ WS End */
 	name = "lawyer blue suitskirt"
 	icon_state = "lawyer_blue_skirt"
 	item_state = "lawyer_blue"
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/rank/civilian/lawyer/bluesuit
 	name = "blue suit"
@@ -203,13 +196,12 @@ WS End */
 	item_state = "b_suit"
 	body_parts_covered = CHEST|GROIN|ARMS
 	can_adjust = FALSE
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/rank/civilian/lawyer/purpsuit
 	name = "purple suit"
 	icon_state = "lawyer_purp"
 	item_state = "p_suit"
-	fitted = NO_FEMALE_UNIFORM
 	can_adjust = TRUE
 	alt_covers_chest = TRUE
 
@@ -219,7 +211,7 @@ WS End */
 	item_state = "p_suit"
 	body_parts_covered = CHEST|GROIN|ARMS
 	can_adjust = FALSE
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/rank/civilian/lawyer/galaxy
 	mob_overlay_icon = 'icons/mob/clothing/under/lawyer_galaxy.dmi'
@@ -237,3 +229,44 @@ WS End */
 	name = "grilling shorts"
 	desc = "For when all you want in life is to grill for god's sake!"
 	icon_state = "cookjorts"
+
+/obj/item/clothing/under/rank/civilian/janitor
+	name = "janitor's jumpsuit"
+	desc = "It's the official uniform of a Nanotrasen janitor. It has minor protection from biohazards."
+	icon_state = "janitor"
+	armor = list("melee" = 0, "bullet" = 0, "laser" = 0,"energy" = 0, "bomb" = 0, "bio" = 10, "rad" = 0, "fire" = 0, "acid" = 0)
+
+/obj/item/clothing/under/rank/civilian/janitor/skirt
+	name = "janitor's jumpskirt"
+	desc = "The official skirt of a Nanotrasen corporate janitor. It has minor protection from biohazards."
+	icon_state = "janitor_skirt"
+	body_parts_covered = CHEST|GROIN|ARMS
+	can_adjust = FALSE
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
+
+/obj/item/clothing/under/rank/civilian/janitor/custodian
+	name = "custodian's jumpsuit"
+	desc = "All the cleaning, none of the praise for custodians that wear this. It has minor protection from biohazards."
+
+	icon_state = "custodian"
+
+/obj/item/clothing/under/rank/civilian/janitor/custodian/skirt
+	name = "custodian's jumpskirt"
+	icon_state = "custodian_skirt"
+	body_parts_covered = CHEST|GROIN|ARMS
+	can_adjust = FALSE
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
+
+/obj/item/clothing/under/rank/civilian/janitor/sanitation_tech
+	name = "sanitation technician's jumpsuit"
+	desc = "Worn by freelance Sanitation Technicians, forever fighting a noble war against the endless filth of the frontier. It has minor protection from biohazards."
+
+	icon_state = "sanitation_technician"
+
+/obj/item/clothing/under/rank/civilian/janitor/sanitation_tech/skirt
+	name = "sanitation technician's jumpskirt"
+	icon_state = "sanitation_technician_skirt"
+	body_parts_covered = CHEST|GROIN|ARMS
+	can_adjust = FALSE
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
+

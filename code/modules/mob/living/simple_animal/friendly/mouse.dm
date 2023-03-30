@@ -54,11 +54,11 @@ GLOBAL_VAR_INIT(mouse_killed, 0)
 	var/full = FALSE //WS Edit
 	var/eating = FALSE //WS Edit
 	var/cheesed = FALSE //WS Edit
-	can_be_held = TRUE
 	held_state = "mouse_gray"
 
 /mob/living/simple_animal/mouse/Initialize()
 	. = ..()
+	ADD_TRAIT(src, TRAIT_HOLDABLE, INNATE_TRAIT)
 	AddComponent(/datum/component/squeak, list('sound/effects/mousesqueek.ogg'=1), 100, extrarange = SHORT_RANGE_SOUND_EXTRARANGE) //as quiet as a mouse or whatever
 	if(!body_color)
 		body_color = pick( list("brown","gray","white") )
@@ -93,12 +93,12 @@ GLOBAL_VAR_INIT(mouse_killed, 0)
 	else
 		..(gibbed)
 
-/mob/living/simple_animal/mouse/Crossed(AM as mob|obj)
-	if( ishuman(AM) )
+/mob/living/simple_animal/mouse/on_entered(datum/source, AM as mob|obj)
+	if(ishuman(AM))
 		if(!stat)
 			var/mob/M = AM
 			to_chat(M, "<span class='notice'>[icon2html(src, M)] Squeak!</span>")
-	..()
+	. = ..()
 
 /mob/living/simple_animal/mouse/handle_automated_action()
 	if(prob(chew_probability))

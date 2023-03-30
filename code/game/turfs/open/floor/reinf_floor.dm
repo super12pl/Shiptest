@@ -3,6 +3,7 @@
 	name = "reinforced floor"
 	desc = "Extremely sturdy."
 	icon_state = "engine"
+	holodeck_compatible = TRUE
 	thermal_conductivity = 0.025
 	heat_capacity = INFINITY
 	floor_tile = /obj/item/stack/sheet/metal
@@ -11,6 +12,7 @@
 	clawfootstep = FOOTSTEP_HARD_CLAW
 	heavyfootstep = FOOTSTEP_GENERIC_HEAVY
 	tiled_dirt = FALSE
+
 
 /turf/open/floor/engine/examine(mob/user)
 	. += ..()
@@ -122,6 +124,9 @@
 	name = "air floor"
 	initial_gas_mix = ATMOS_TANK_AIRMIX
 
+/turf/open/floor/engine/fuel
+	name = "fuel mix floor"
+	initial_gas_mix = ATMOS_TANK_FUEL
 
 
 /turf/open/floor/engine/cult
@@ -132,7 +137,7 @@
 	var/obj/effect/cult_turf/overlay/floor/bloodcult/realappearance
 
 
-/turf/open/floor/engine/cult/Initialize()
+/turf/open/floor/engine/cult/Initialize(mapload, inherited_virtual_z)
 	. = ..()
 	new /obj/effect/temp_visual/cult/turf/floor(src)
 	realappearance = new /obj/effect/cult_turf/overlay/floor/bloodcult(src)

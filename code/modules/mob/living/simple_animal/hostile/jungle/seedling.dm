@@ -8,7 +8,7 @@
 /mob/living/simple_animal/hostile/jungle/seedling
 	name = "seedling"
 	desc = "This oversized, predatory flower conceals what can only be described as an organic energy cannon, and it will not die until its hidden vital organs are sliced out. \
-	 The concentrated streams of energy it sometimes produces require its full attention, attacking it during this time will prevent it from finishing its attack."
+	The concentrated streams of energy it sometimes produces require its full attention, attacking it during this time will prevent it from finishing its attack."
 	icon = 'icons/mob/jungle/seedling.dmi'
 	icon_state = "seedling"
 	icon_living = "seedling"
@@ -18,7 +18,9 @@
 	melee_damage_lower = 30
 	melee_damage_upper = 30
 	pixel_x = -16
+	base_pixel_x = -16
 	pixel_y = -14
+	base_pixel_y = -14
 	minimum_distance = 3
 	move_to_delay = 20
 	vision_range = 9
@@ -29,6 +31,7 @@
 	projectilesound = 'sound/weapons/pierce.ogg'
 	robust_searching = TRUE
 	stat_attack = HARD_CRIT
+	environment_smash = ENVIRONMENT_SMASH_WALLS
 	move_resist = MOVE_FORCE_EXTREMELY_STRONG
 	var/combatant_state = SEEDLING_STATE_NEUTRAL
 	var/obj/seedling_weakpoint/weak_point
@@ -146,7 +149,7 @@
 
 /mob/living/simple_animal/hostile/jungle/seedling/proc/Beamu(mob/living/living_target, beam_id = 0)
 	if(combatant_state == SEEDLING_STATE_ACTIVE && living_target && beam_id == solar_beam_identifier)
-		if(living_target.get_virtual_z_level() == get_virtual_z_level())
+		if(living_target.virtual_z() == virtual_z())
 			update_icons()
 			var/obj/effect/temp_visual/solarbeam_killsat/S = new (get_turf(src))
 			var/matrix/starting = matrix()

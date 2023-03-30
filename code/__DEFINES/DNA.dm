@@ -113,28 +113,28 @@
 #define HAIR 2
 #define FACEHAIR 3
 #define EYECOLOR 4
-#define LIPS 5
-#define NOBLOOD 6
-#define NOTRANSSTING 7
+#define SCLERA 5
+#define EMOTE_OVERLAY 6
+#define LIPS 7
+#define NOBLOOD 8
+#define NOTRANSSTING 9
 /// Used if we want the mutant colour to be only used by mutant bodyparts. Don't combine this with MUTCOLORS, or it will be useless.
-#define MUTCOLORS_PARTSONLY 8
-#define NOZOMBIE 9
-/// Uses weird leg sprites. Optional for lizards, required for ashwalkers. Don't give it to other races unless you make sprites for this (see human_parts_greyscale.dmi)
-#define DIGITIGRADE 10
-#define NO_UNDERWEAR 11
-#define NOLIVER 12
-#define NOSTOMACH 13
-#define NO_DNA_COPY 14
-#define DRINKSBLOOD 15
-#define NOFLASH 16
-#define DYNCOLORS 17 //! Use this if you want to change the race's color without the player being able to pick their own color. AKA special color shifting
-#define AGENDER 18
-#define NOEYESPRITES 19 //! Do not draw eyes or eyeless overlay
-#define NOREAGENTS 20 //! DO NOT PROCESS REAGENTS
+#define MUTCOLORS_PARTSONLY 10
+#define NOZOMBIE 11
+#define NO_UNDERWEAR 12
+#define NOLIVER 13
+#define NOSTOMACH 14
+#define NO_DNA_COPY 15
+#define DRINKSBLOOD 16
+#define NOFLASH 17
+#define DYNCOLORS 18 //! Use this if you want to change the race's color without the player being able to pick their own color. AKA special color shifting TRANSLATION: AWFUL.
+#define AGENDER 19
+#define NOEYESPRITES 20 //! Do not draw eyes or eyeless overlay
+#define NOREAGENTS 21 //! DO NOT PROCESS REAGENTS
 #define REVIVESBYHEALING 21 // Will revive on heal when healing and total HP > 0.
 #define NOHUSK 22 // Can't be husked.
-#define ROBOTIC_LIMBS 23 //limbs start out as robotic; but also use organic icons. If you want to use the default ones, you'll have to use on_species_gain
-#define NOMOUTH 24
+#define NOMOUTH 23
+#define NOSOCKS 24 // You cannot wear sock
 #define NO_BONES 25 //WS Edit - Breakable Bones
 
 //organ slots
@@ -178,3 +178,8 @@
 #define G_MALE 1
 #define G_FEMALE 2
 #define G_PLURAL 3
+
+//Body sizes
+#define BODY_SIZE_NORMAL 1
+#define BODY_SIZE_SHORT 0.93
+#define BODY_SIZE_TALL 1.03

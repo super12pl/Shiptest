@@ -6,14 +6,17 @@
 	max_damage = 200
 	body_zone = BODY_ZONE_CHEST
 	body_part = CHEST
+	plaintext_zone = "chest"
 	px_x = 0
 	px_y = 0
 	stam_damage_coeff = 1
 	max_stamina_damage = 120
+	is_dimorphic = TRUE
 	var/obj/item/cavity_item
+	var/acceptable_bodytype = BODYTYPE_HUMANOID
 
-/obj/item/bodypart/chest/can_dismember(obj/item/I)
-	if(owner.stat <= HARD_CRIT)
+/obj/item/bodypart/chest/can_dismember()
+	if(owner?.stat <= HARD_CRIT)
 		return FALSE
 	return ..()
 
@@ -30,6 +33,7 @@
 /obj/item/bodypart/chest/monkey
 	icon = 'icons/mob/animal_parts.dmi'
 	icon_state = "default_monkey_chest"
+	limb_id = SPECIES_MONKEY
 	animal_origin = MONKEY_BODYPART
 
 /obj/item/bodypart/chest/alien
@@ -63,6 +67,7 @@
 	max_stamina_damage = 50
 	body_zone = BODY_ZONE_L_ARM
 	body_part = ARM_LEFT
+	plaintext_zone = "left arm"
 	aux_zone = BODY_ZONE_PRECISE_L_HAND
 	aux_layer = HANDS_PART_LAYER
 	body_damage_coeff = 0.75
@@ -133,6 +138,7 @@
 /obj/item/bodypart/l_arm/monkey
 	icon = 'icons/mob/animal_parts.dmi'
 	icon_state = "default_monkey_l_arm"
+	limb_id = SPECIES_MONKEY
 	animal_origin = MONKEY_BODYPART
 	px_x = -5
 	px_y = -3
@@ -162,6 +168,7 @@
 	max_damage = 50
 	body_zone = BODY_ZONE_R_ARM
 	body_part = ARM_RIGHT
+	plaintext_zone = "right arm"
 	aux_zone = BODY_ZONE_PRECISE_R_HAND
 	aux_layer = HANDS_PART_LAYER
 	body_damage_coeff = 0.75
@@ -233,6 +240,7 @@
 /obj/item/bodypart/r_arm/monkey
 	icon = 'icons/mob/animal_parts.dmi'
 	icon_state = "default_monkey_r_arm"
+	limb_id = SPECIES_MONKEY
 	animal_origin = MONKEY_BODYPART
 	px_x = 5
 	px_y = -3
@@ -262,6 +270,7 @@
 	max_damage = 50
 	body_zone = BODY_ZONE_L_LEG
 	body_part = LEG_LEFT
+	plaintext_zone = "left leg"
 	body_damage_coeff = 0.75
 	px_x = -2
 	px_y = 12
@@ -320,13 +329,10 @@
 		owner.set_usable_legs(owner.usable_legs + 1)
 
 
-/obj/item/bodypart/l_leg/digitigrade
-	name = "left digitigrade leg"
-	use_digitigrade = FULL_DIGITIGRADE
-
 /obj/item/bodypart/l_leg/monkey
 	icon = 'icons/mob/animal_parts.dmi'
 	icon_state = "default_monkey_l_leg"
+	limb_id = SPECIES_MONKEY
 	animal_origin = MONKEY_BODYPART
 	px_y = 4
 
@@ -357,6 +363,7 @@
 	max_damage = 50
 	body_zone = BODY_ZONE_R_LEG
 	body_part = LEG_RIGHT
+	plaintext_zone = "right leg"
 	body_damage_coeff = 0.75
 	px_x = 2
 	px_y = 12
@@ -415,13 +422,10 @@
 		owner.set_usable_legs(owner.usable_legs + 1)
 
 
-/obj/item/bodypart/r_leg/digitigrade
-	name = "right digitigrade leg"
-	use_digitigrade = FULL_DIGITIGRADE
-
 /obj/item/bodypart/r_leg/monkey
 	icon = 'icons/mob/animal_parts.dmi'
 	icon_state = "default_monkey_r_leg"
+	limb_id = SPECIES_MONKEY
 	animal_origin = MONKEY_BODYPART
 	px_y = 4
 

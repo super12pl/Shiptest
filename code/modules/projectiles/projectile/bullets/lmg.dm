@@ -3,6 +3,32 @@
 /obj/projectile/bullet/c3d
 	damage = 20
 
+/obj/projectile/bullet/ctac
+	damage = 40
+	armour_penetration = 35
+	speed = 0.4
+
+/obj/projectile/bullet/csour
+	damage = 0
+	stamina = 60
+	jitter = 30
+	stutter = 10
+	slur = 10
+	knockdown = 5
+	armour_penetration = 30
+
+/obj/projectile/bullet/csweet
+	damage = 5
+	irradiate = 250
+	speed = 1.2
+
+/obj/projectile/bullet/csweet/on_hit(atom/target, blocked = FALSE)
+	. = ..()
+	if(iscarbon(target))
+		var/mob/living/carbon/M = target
+		M.adjust_fire_stacks(8)
+		M.IgniteMob()
+
 // Mech LMG
 
 /obj/projectile/bullet/lmg
@@ -18,6 +44,9 @@
 /obj/projectile/bullet/manned_turret
 	damage = 20
 
+/obj/projectile/bullet/manned_turret/hmg
+	icon_state = "redtrac"
+
 /obj/projectile/bullet/syndicate_turret
 	damage = 20
 
@@ -25,22 +54,21 @@
 
 /obj/projectile/bullet/mm712x82
 	name = "7.12x82mm bullet"
-	damage = 45
+	damage = 35
 	armour_penetration = 5
 
 /obj/projectile/bullet/mm712x82_ap
 	name = "7.12x82mm armor-piercing bullet"
-	damage = 40
 	armour_penetration = 75
 
 /obj/projectile/bullet/mm712x82_hp
 	name = "7.12x82mm hollow-point bullet"
-	damage = 60
+	damage = 50
 	armour_penetration = -60
 
 /obj/projectile/bullet/incendiary/mm712x82
 	name = "7.12x82mm incendiary bullet"
-	damage = 20
+	damage = 15
 	fire_stacks = 3
 
 /obj/projectile/bullet/mm712x82_match

@@ -17,6 +17,8 @@ GLOBAL_LIST_EMPTY(undershirt_m)	 //stores only undershirt name
 GLOBAL_LIST_EMPTY(undershirt_f)	 //stores only undershirt name
 	//Socks
 GLOBAL_LIST_EMPTY(socks_list)		//stores /datum/sprite_accessory/socks indexed by name
+	//Body Sizes
+GLOBAL_LIST_INIT(body_sizes, list("Normal" = BODY_SIZE_NORMAL, "Short" = BODY_SIZE_SHORT, "Tall" = BODY_SIZE_TALL))
 	//lizard Bits (all datum lists indexed by name)
 GLOBAL_LIST_EMPTY(body_markings_list)
 GLOBAL_LIST_EMPTY(tails_list_lizard)
@@ -43,11 +45,18 @@ GLOBAL_LIST_EMPTY(squid_face_list)
 GLOBAL_LIST_EMPTY(ipc_screens_list)
 GLOBAL_LIST_EMPTY(ipc_antennas_list)
 GLOBAL_LIST_EMPTY(ipc_chassis_list)
+GLOBAL_LIST_INIT(ipc_brain_list, list("Posibrain", "Man-Machine Interface"))
 GLOBAL_LIST_EMPTY(spider_legs_list)
 GLOBAL_LIST_EMPTY(spider_spinneret_list)
 GLOBAL_LIST_EMPTY(spider_mandibles_list)
-GLOBAL_LIST_EMPTY(teshari_feathers_list)
-GLOBAL_LIST_EMPTY(teshari_body_feathers_list)
+GLOBAL_LIST_EMPTY(kepori_feathers_list)
+GLOBAL_LIST_EMPTY(kepori_body_feathers_list)
+GLOBAL_LIST_EMPTY(kepori_tail_feathers_list)
+GLOBAL_LIST_EMPTY(vox_head_quills_list)
+GLOBAL_LIST_EMPTY(vox_neck_quills_list)
+GLOBAL_LIST_EMPTY(elzu_horns_list)
+GLOBAL_LIST_EMPTY(tails_list_elzu)
+GLOBAL_LIST_EMPTY(animated_tails_list_elzu)
 
 GLOBAL_LIST_INIT(color_list_ethereal, list(
 	"Red" = "ff4d4d",
@@ -170,11 +179,10 @@ GLOBAL_LIST_INIT(backpacklist, list(DBACKPACK, DSATCHEL, DCOURIERBAG, DDUFFELBAG
 #define PREF_SKIRT "Standard Jumpskirt"
 #define PREF_ALTSUIT "Alternate Jumpsuit"
 #define PREF_GREYSUIT "Grey Jumpsuit"
-#define PREF_LOADOUT "Loadout uniform"
-GLOBAL_LIST_INIT(jumpsuitlist, list(PREF_SUIT, PREF_SKIRT, PREF_ALTSUIT, PREF_GREYSUIT, PREF_LOADOUT))
+GLOBAL_LIST_INIT(jumpsuitlist, list(PREF_SUIT, PREF_SKIRT, PREF_ALTSUIT, PREF_GREYSUIT))
 
 	//Exowear
-#define PREF_NOEXOWEAR "No Exowear/Loadout Exowear"
+#define PREF_NOEXOWEAR "No Exowear"
 #define PREF_EXOWEAR "Standard Exowear"
 #define PREF_ALTEXOWEAR "Alternate Exowear"
 #define PREF_COATEXOWEAR "Departmental Winter Coat"
@@ -264,6 +272,10 @@ GLOBAL_LIST_INIT(wisdoms, world.file2list("strings/wisdoms.txt"))
 GLOBAL_LIST_INIT(ship_names, world.file2list("strings/ship_names.txt"))
 
 GLOBAL_LIST_INIT(star_names, world.file2list("strings/star_names.txt"))
+
+GLOBAL_LIST_INIT(planet_names, world.file2list("strings/planet_names.txt"))
+
+GLOBAL_LIST_INIT(planet_prefixes, world.file2list("strings/planet_prefixes.txt"))
 
 /proc/generate_number_strings()
 	var/list/L[198]

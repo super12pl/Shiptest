@@ -1,11 +1,7 @@
 /datum/job/atmos
-	title = "Atmospheric Technician"
-	department_head = list("Chief Engineer")
-	faction = "Station"
+	name = "Atmospheric Technician"
 	total_positions = 3
 	spawn_positions = 2
-	supervisors = "the chief engineer"
-	selection_color = "#fff5cc"
 	exp_requirements = 60
 	exp_type = EXP_TYPE_CREW
 	wiki_page = "Guide_to_Atmospherics" //WS Edit - Wikilinks/Warning
@@ -16,12 +12,11 @@
 									ACCESS_EXTERNAL_AIRLOCKS, ACCESS_CONSTRUCTION, ACCESS_ATMOSPHERICS, ACCESS_MINERAL_STOREROOM, ACCESS_EVA)
 	minimal_access = list(ACCESS_ATMOSPHERICS, ACCESS_MAINT_TUNNELS, ACCESS_EXTERNAL_AIRLOCKS, ACCESS_ENGINE,
 									ACCESS_ENGINE_EQUIP, ACCESS_CONSTRUCTION, ACCESS_MECH_ENGINE, ACCESS_MINERAL_STOREROOM)
-	paycheck = PAYCHECK_MEDIUM
-	paycheck_department = ACCOUNT_ENG
 	display_order = JOB_DISPLAY_ORDER_ATMOSPHERIC_TECHNICIAN
 
 /datum/outfit/job/atmos
 	name = "Atmospheric Technician"
+	job_icon = "atmospherictechnician"
 	jobtype = /datum/job/atmos
 
 	belt = /obj/item/storage/belt/utility/atmostech
@@ -71,3 +66,12 @@
 	neck = /obj/item/clothing/neck/tie/light_blue
 
 	backpack_contents = list(/obj/item/modular_computer/tablet/preset/advanced=1, /obj/item/storage/belt/utility/atmostech=1)
+
+//Shiptest
+/datum/outfit/job/atmos/gec
+	name = "Atmospheric Technician (GEC)"
+
+	uniform = /obj/item/clothing/under/syndicate/gec/atmos_tech
+	suit = /obj/item/clothing/suit/toggle/hazard
+	head = /obj/item/clothing/head/hardhat
+	id = /obj/item/card/id/syndicate_command/crew_id

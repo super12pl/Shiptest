@@ -99,6 +99,9 @@
 	else if(W.tool_behaviour == TOOL_WELDER)
 		if(W.use_tool(src, user, 0, volume=50))
 			dismantle(user, TRUE)
+	else if(istype(W, /obj/item/pickaxe/drill/jackhammer))
+		W.play_tool_sound(src)
+		dismantle(user, TRUE)
 	else
 		return ..()
 
@@ -324,7 +327,7 @@
 /obj/structure/falsewall/titanium
 	name = "wall"
 	desc = "A light-weight titanium wall used in shuttles."
-	icon = 'whitesands/icons/turf/walls/shuttle_wall.dmi'
+	icon = 'icons/turf/walls/shuttle_wall.dmi'
 	icon_state = "shuttle_wall-0"
 	base_icon_state = "shuttle_wall"
 	mineral = /obj/item/stack/sheet/mineral/titanium

@@ -5,9 +5,9 @@
 	item_state = "crusher0"
 	lefthand_file = 'icons/mob/inhands/weapons/hammers_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/weapons/hammers_righthand.dmi'
-	name = "proto-kinetic crusher"
-	desc = "During the early conception of the Kinetic Accelerator, a great deal of money and time was invested in magnetic distruption technology. \
-	Though ultimately replaced with concussive explosions, the ever-practical NT scientific division designed a second mining tool, capable of tearing apart rock with magnetic force and a chopping edge."
+	name = "proto-magnetic crusher"
+	desc = "A multipurpose disembarkation and self-defense tool designed by EXOCON using an incomplete Nanotrasen prototype. \
+	Found in the grime-stained hands of wannabee explorers across the frontier, it cuts rock and hews flora using magnetic osscilation and a heavy cleaving edge."
 	force = 0 //You can't hit stuff unless wielded
 	w_class = WEIGHT_CLASS_BULKY
 	slot_flags = ITEM_SLOT_BACK
@@ -282,6 +282,27 @@
 	if(missing_health > 0)
 		target.adjustBruteLoss(missing_health) //and do that much damage
 
+//crystal goliath
+/obj/item/crusher_trophy/goliath_crystal
+	name = "goliath crystal"
+	desc = "A crystal ripped off from a goliath infected by the strange crystals. You can see the original skin of the goliath deeply embeded in it."
+	icon_state = "goliath_crystal"
+	denied_type = /obj/item/crusher_trophy/elder_tentacle
+	bonus_value = 4
+	var/missing_health_ratio = 0.1
+	var/missing_health_desc = 5
+
+/obj/item/crusher_trophy/goliath_crystal/effect_desc()
+	return "waveform collapse to stun creatures for <b>[bonus_value*0.1]</b> second\s"
+
+/obj/item/crusher_trophy/goliath_crystal/on_mark_detonation(mob/living/simple_animal/target, mob/living/user)
+	if(!ishostile(target))
+		return
+	var/mob/living/simple_animal/hostile/hostile_target = target
+	var/hostile_ai_status = hostile_target.AIStatus
+	hostile_target.AIStatus = AI_OFF
+	addtimer(VARSET_CALLBACK(hostile_target, AIStatus, hostile_ai_status), bonus_value*0.1 SECONDS)
+
 //watcher
 /obj/item/crusher_trophy/watcher_wing
 	name = "watcher wing"
@@ -355,6 +376,39 @@
 			else
 				H.ranged_cooldown = bonus_value + world.time
 
+//forgotten watcher
+/obj/item/crusher_trophy/watcher_wing_forgotten
+	name = "forgotten watcher wing"
+	desc = "A wing with a terminal infection of the strange crystals."
+	icon_state = "watcher_wing_crystal"
+	denied_type = /obj/item/crusher_trophy/watcher_wing_forgotten
+	gender = NEUTER
+	bonus_value = 20
+	var/deadly_shot = FALSE
+
+/obj/item/crusher_trophy/watcher_wing_forgotten/effect_desc()
+	return "waveform collapse to make the next magnetic pulse deal <b>[bonus_value]</b> damage"
+
+/obj/item/crusher_trophy/watcher_wing_forgotten/examine(mob/user)
+	. = ..()
+	. += "<span class='notice'>Suitable as a trophy for a proto-kinetic crusher.</span>"
+
+/obj/item/crusher_trophy/watcher_wing_forgotten/on_projectile_fire(obj/projectile/destabilizer/marker, mob/living/user)
+	if(deadly_shot)
+		marker.name = "crystal [marker.name]"
+		marker.icon_state = "crystal_shard"
+		marker.damage = bonus_value
+		marker.nodamage = FALSE
+		marker.speed = 2
+		deadly_shot = FALSE
+
+/obj/item/crusher_trophy/watcher_wing_forgotten/on_mark_detonation(mob/living/target, mob/living/user)
+	deadly_shot = TRUE
+	addtimer(CALLBACK(src, .proc/reset_deadly_shot), 300, TIMER_UNIQUE|TIMER_OVERRIDE)
+
+/obj/item/crusher_trophy/watcher_wing_forgotten/proc/reset_deadly_shot()
+	deadly_shot = FALSE
+
 //legion
 /obj/item/crusher_trophy/legion_skull
 	name = "legion skull"
@@ -386,7 +440,7 @@
 	desc = "Looks like someone hasn't been drinking their milk. Could be used in crafting."
 	icon = 'icons/obj/lavaland/elite_trophies.dmi'
 	icon_state = "shrunk_skull"
-	denied_type = /obj/item/crusher_trophy/legion_skull
+	denied_type = /obj/item/crusher_trophy/dwarf_skull
 	bonus_value = 6
 
 /obj/item/crusher_trophy/dwarf_skull/effect_desc()
@@ -401,6 +455,49 @@
 	. = ..()
 	if(.)
 		H.charge_time += bonus_value
+
+
+//disfigured legion
+/obj/item/crusher_trophy/legion_skull_crystal
+	name = "disfigured legion skull"
+	desc = "A dead and lifeless legion skull. The crystals keep it alive, even in agony."
+	icon_state = "legion_skull_crystal"
+	denied_type = /obj/item/crusher_trophy/legion_skull_crystal
+	bonus_value = 1
+
+/obj/item/crusher_trophy/legion_skull_crystal/examine(mob/user)
+	. = ..()
+	. += "<span class='notice'>Suitable as a trophy for a proto-kinetic crusher.</span>"
+
+/obj/item/crusher_trophy/legion_skull_crystal/effect_desc()
+	return "waveform collapse to shoot 3 projectiles that only hits hostile fauna"
+
+/obj/item/crusher_trophy/legion_skull_crystal/on_mark_detonation(mob/living/target, mob/living/user)
+	for(var/i in 0 to 5)
+		var/obj/projectile/projectile_to_shoot = new /obj/projectile/crystalline_crusher(get_turf(src))
+		projectile_to_shoot.preparePixelProjectile(get_step(src, pick(GLOB.alldirs)), get_turf(src))
+		projectile_to_shoot.firer = user
+		projectile_to_shoot.fire(i*(360/5))
+	return ..()
+
+/obj/projectile/crystalline_crusher
+	name = "Crystalline Shard"
+	icon_state = "crystal_shard"
+	damage = 25
+	damage_type = BRUTE
+	speed = 3
+
+/obj/projectile/crystalline_crusher/on_hit(atom/target, blocked)
+	. = ..()
+	var/turf/turf_hit = get_turf(target)
+	new /obj/effect/temp_visual/goliath_tentacle/crystal/visual_only(turf_hit,firer)
+
+/obj/projectile/crystalline_crusher/can_hit_target(atom/target, list/passthrough, direct_target, ignore_loc)
+	if(!(istype(target,/mob/living/simple_animal/hostile/asteroid)))
+		if(isturf(target))
+			return ..()
+		return FALSE
+	return ..()
 
 //blood-drunk hunter
 /obj/item/crusher_trophy/miner_eye
@@ -590,7 +687,7 @@
 	return "you also passively recharge pulses 5x as fast while this is equipped and do a decent amount of damage at the cost of dulling the blade"
 
 /obj/item/crusher_trophy/king_goat/on_projectile_fire(obj/projectile/destabilizer/marker, mob/living/user)
-	marker.damage = 10 //in my testing only does damage to simple mobs so should be fine to have it high
+	marker.damage = 10 //in my testing only does damage to simple mobs so should be fine to have it high //it does damage to nobody. Please fix -M
 
 /obj/item/crusher_trophy/king_goat/add_to(obj/item/kinetic_crusher/H, mob/living/user)
 	. = ..()
@@ -618,9 +715,112 @@
 /obj/item/crusher_trophy/shiny/add_to(obj/item/kinetic_crusher/H, mob/living/user)
 	. = ..()
 	if(.)
-		H.AddComponent(/datum/component/butchering, 150, 250)
+		H.AddComponent(/datum/component/butchering, 60, 210)
 
 /obj/item/crusher_trophy/shiny/remove_from(obj/item/kinetic_crusher/H, mob/living/user)
 	. = ..()
 	if(.)
 		H.AddComponent(/datum/component/butchering, 60, 110)
+
+//outdated Nanotrasen prototype of the crusher. Incredibly heavy, but the blade was made at a premium. //to alter this I had to duplicate some code, big moment.
+/obj/item/kinetic_crusher/old
+	icon_state = "crusherold"
+	item_state = "crusherold0"
+	name = "proto-kinetic crusher"
+	desc = "During the early design process of the Kinetic Accelerator, a great deal of money and time was invested in magnetic distruption technology. \
+	Though eventually replaced with concussive blasts, the ever-practical NT designed a second mining tool. \
+	Only a few were ever produced, mostly for NT research institutions, and they are a valulable relic in the postwar age."
+	slowdown = 0.5//hevy
+	attack_verb = list("mashed", "flattened", "bisected", "eradicated","destroyed")
+
+/obj/item/kinetic_crusher/old/examine(mob/user)
+	. = ..()
+	. += "<span class='notice'>This hunk of junk's so heavy that you can barely swing it! Though, that blade looks pretty sharp...</span>"
+
+/obj/item/kinetic_crusher/old/ComponentInitialize()
+	. = ..()
+	AddComponent(/datum/component/butchering, 60, 110)
+	AddComponent(/datum/component/two_handed, force_unwielded=0, force_wielded=45)//big choppa!
+
+/obj/item/kinetic_crusher/old/melee_attack_chain(mob/user, atom/target, params)
+	..()
+	user.changeNext_move(CLICK_CD_MELEE * 2.0)//...slow swinga.
+
+/obj/item/kinetic_crusher/old/update_icon_state()
+	item_state = "crusherold[wielded]" // still not supported by 2hcomponent
+
+//100% original syndicate oc, plz do not steal. More effective against human targets then the typical crusher, with a bit of block chance.
+/obj/item/kinetic_crusher/syndie_crusher
+	icon = 'icons/obj/mining.dmi'
+	icon_state = "crushersyndie"
+	item_state = "crushersyndie0"
+	lefthand_file = 'icons/mob/inhands/weapons/hammers_lefthand.dmi'
+	righthand_file = 'icons/mob/inhands/weapons/hammers_righthand.dmi'
+	name = "magnetic cleaver"
+	desc = "Designed by Syndicate Research and Development for their resource-gathering operations on hostile worlds. Syndicate Legal Ops would like to stress that you've never seen anything like this before. Ever."
+	armour_penetration = 69//nice cut
+	force = 0 //You can't hit stuff unless wielded
+	w_class = WEIGHT_CLASS_BULKY
+	slot_flags = ITEM_SLOT_BACK
+	throwforce = 5
+	throw_speed = 4
+	block_chance = 30
+	custom_materials = list(/datum/material/titanium=5000, /datum/material/iron=2075)
+	hitsound = 'sound/weapons/blade1.ogg'
+	attack_verb = list("sliced", "bisected", "diced", "chopped", "filleted")
+	sharpness = IS_SHARP
+	obj_flags = UNIQUE_RENAME
+	light_color = "#fb6767"
+	light_system = MOVABLE_LIGHT
+	light_range = 3
+	light_power = 1
+	light_on = FALSE
+	custom_price = 7500//a rare syndicate prototype.
+	charged = TRUE
+	charge_time = 15
+	detonation_damage = 20
+	backstab_bonus = 30
+	wielded = FALSE // track wielded status on item
+	actions_types = list()
+
+/obj/item/kinetic_crusher/syndie_crusher/ComponentInitialize()
+	. = ..()
+	AddComponent(/datum/component/butchering, 60, 150)
+	AddComponent(/datum/component/two_handed, force_unwielded=0, force_wielded=35)
+
+/// triggered on wield of two handed item
+/obj/item/kinetic_crusher/syndie_crusher/on_wield(obj/item/source, mob/user)
+	. = ..()
+	wielded = TRUE
+	icon_state = "crushersyndie1"
+	playsound(user, 'sound/weapons/saberon.ogg', 35, TRUE)
+	set_light_on(wielded)
+
+/// triggered on unwield of two handed item
+/obj/item/kinetic_crusher/syndie_crusher/on_unwield(obj/item/source, mob/user)
+	. = ..()
+	wielded = FALSE
+	icon_state = "crushersyndie"
+	playsound(user, 'sound/weapons/saberoff.ogg', 35, TRUE)
+	set_light_on(wielded)
+
+/obj/item/kinetic_crusher/syndie_crusher/update_icon_state()
+	item_state = "crushersyndie[wielded]" // this is not icon_state and not supported by 2hcomponent
+
+/obj/item/kinetic_crusher/syndie_crusher/update_overlays()
+	. = ..()
+	if(wielded)
+		. += "[icon_state]_lit"
+
+/obj/item/crusher_trophy/lobster_claw
+	name = "lobster claw"
+	icon_state = "lobster_claw"
+	desc = "A lobster claw."
+	denied_type = /obj/item/crusher_trophy/lobster_claw
+	bonus_value = 1
+
+/obj/item/crusher_trophy/lobster_claw/effect_desc()
+	return "mark detonation to briefly stagger the target for [bonus_value] seconds"
+
+/obj/item/crusher_trophy/lobster_claw/on_mark_detonation(mob/living/target, mob/living/user)
+	target.apply_status_effect(/datum/status_effect/stagger, bonus_value SECONDS)

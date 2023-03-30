@@ -1,4 +1,4 @@
- //Suits for the pink and grey skeletons! //EVA version no longer used in favor of the Jumpsuit version
+//Suits for the pink and grey skeletons! //EVA version no longer used in favor of the Jumpsuit version
 
 
 /obj/item/clothing/suit/space/eva/plasmaman
@@ -62,7 +62,7 @@
 	visor_flags_inv = HIDEEYES|HIDEFACE
 
 // WS Begin - plasmeme command helmets buff - used for RD bomb scanner
-/obj/item/clothing/head/helmet/space/plasmaman/proc/display_visor_message(var/msg)
+/obj/item/clothing/head/helmet/space/plasmaman/proc/display_visor_message(msg)
 	var/mob/wearer = loc
 	if(msg && ishuman(wearer))
 		wearer.show_message("[icon2html(src, wearer)]<b><span class='robot'>[msg]</span></b>", MSG_VISUAL)
@@ -182,7 +182,7 @@
 
 /obj/item/clothing/head/helmet/space/plasmaman/viro
 	name = "virology plasma envirosuit helmet"
-	desc = "The helmet worn by the safest people on the station, those who are completely immune to the monstrosities they create."
+	desc = "The helmet worn by the safest people in virology, those who are completely immune to the monstrosities they create."
 	icon_state = "virologist_envirohelm"
 	item_state = "virologist_envirohelm"
 

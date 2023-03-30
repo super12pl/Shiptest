@@ -15,7 +15,7 @@
 	item_state = "lb_suit"
 	body_parts_covered = CHEST|GROIN|ARMS
 	can_adjust = FALSE
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/rank/cargo/tech
 	name = "cargo technician's jumpsuit"
@@ -23,7 +23,7 @@
 	icon_state = "cargotech"
 	item_state = "lb_suit"
 	body_parts_covered = CHEST|GROIN|ARMS
-	mutantrace_variation = MUTANTRACE_VARIATION
+	supports_variations = DIGITIGRADE_VARIATION | VOX_VARIATION
 	alt_covers_chest = TRUE
 
 /obj/item/clothing/under/rank/cargo/tech/skirt
@@ -32,9 +32,8 @@
 	icon_state = "cargo_skirt"
 	item_state = "lb_suit"
 	body_parts_covered = CHEST|GROIN|ARMS
-	mutantrace_variation = NO_MUTANTRACE_VARIATION
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 	can_adjust = FALSE
-	fitted = FEMALE_UNIFORM_TOP
 
 /obj/item/clothing/under/rank/cargo/miner
 	desc = "It's a snappy jumpsuit with a sturdy set of overalls. It is very dirty."
@@ -45,11 +44,12 @@
 	resistance_flags = NONE
 
 /obj/item/clothing/under/rank/cargo/miner/lavaland
-	desc = "A green uniform for operating in hazardous environments."
-	name = "shaft miner's jumpsuit"
+	desc = "A light uniform for operating in hazardous environments, manufactured en-masse by EXOCON for the profitable frontier prospector market. Adventurous khaki jeans included."
+	name = "prospector jumpsuit"
 	icon_state = "explorer"
 	item_state = "explorer"
-	can_adjust = FALSE
+	can_adjust = TRUE
+	supports_variations = DIGITIGRADE_VARIATION | VOX_VARIATION
 
 //Shiptest alt jumpsuits
 
@@ -58,3 +58,56 @@
 	name = "asteroid miner's jumpsuit"
 	icon_state = "hazard"
 	item_state = "hazard"
+
+/obj/item/clothing/under/rank/cargo/miner/lavaland/old
+	icon_state = "explorerold"
+	desc = "A standardized NT jumpsuit line, designed to protect the fragile and profitable bodies of the shaft-charting explorers Nanotrasen Resource Operations favoured in the closing years of their golden age. Slightly encumbering, due to heavy protective padding."
+	name = "prototype shaft miner's jumpsuit"
+	slowdown = 0.1
+	armor = list("melee" = 15, "bullet" = 5, "laser" = 5,"energy" = 5, "bomb" = 20, "bio" = 20, "rad" = 20, "fire" = 80, "acid" = 0)
+	can_adjust = FALSE
+
+/obj/item/clothing/under/suit/qm
+	name = "supply chief suit"
+	desc = "A suit with supply colors, worn by those who lead the supply department."
+	icon_state = "supply_chief"
+	icon = 'icons/obj/clothing/under/cargo.dmi'
+	mob_overlay_icon = 'icons/mob/clothing/under/cargo.dmi'
+
+/obj/item/clothing/under/suit/qm/skirt
+	name = "supply chief skirtsuit"
+	icon_state = "supply_chief_skirt"
+	body_parts_covered = CHEST|GROIN|ARMS
+	can_adjust = FALSE
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
+
+/obj/item/clothing/under/suit/cargo_tech
+	name = "deliveries officer suit"
+	desc = "A suit with cargo colors, with a pair of shorts..."
+	icon_state = "deliveries_officer"
+	icon = 'icons/obj/clothing/under/cargo.dmi'
+	mob_overlay_icon = 'icons/mob/clothing/under/cargo.dmi'
+
+/obj/item/clothing/under/suit/cargo_tech/skirt
+	name = "deliveries officer skirtsuit"
+	desc = "A suit with cargo colors, with a skirt..."
+	icon_state = "deliveries_officer_skirt"
+
+	body_parts_covered = CHEST|GROIN|ARMS
+	can_adjust = FALSE
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
+
+/obj/item/clothing/under/rank/cargo/tech/mailroom_technician
+	name = "mailroom technician's jumpsuit"
+	desc = "Shorts and lost mail makes up this jumpsuit."
+	icon_state = "mailroom_technician"
+	body_parts_covered = CHEST|GROIN|ARMS
+	icon = 'icons/obj/clothing/under/cargo.dmi'
+	mob_overlay_icon = 'icons/mob/clothing/under/cargo.dmi'
+
+/obj/item/clothing/under/rank/cargo/tech/mailroom_technician/skirt
+	name = "mailroom technician's jumpskirt"
+	desc = "Skirts and lost mail makes up this jumpskirt."
+	icon_state = "mailroom_technician_skirt"
+	can_adjust = FALSE
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION

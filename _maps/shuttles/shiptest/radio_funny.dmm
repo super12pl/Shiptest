@@ -23,7 +23,7 @@
 /turf/open/floor/plasteel/freezer,
 /area/ship/bridge)
 "aW" = (
-/obj/machinery/computer/autopilot,
+/obj/structure/frame/computer,
 /turf/open/floor/carpet/nanoweave/blue,
 /area/ship/bridge)
 "bD" = (
@@ -114,7 +114,6 @@
 	height = 13;
 	launch_status = 0;
 	port_direction = 2;
-	undock_roundstart = 1;
 	width = 11
 	},
 /turf/open/floor/carpet/nanoweave/red,
@@ -248,7 +247,7 @@
 /turf/open/floor/carpet/nanoweave/blue,
 /area/ship/bridge)
 "Ky" = (
-/turf/open/space/basic,
+/turf/open/space,
 /area/space)
 "KK" = (
 /turf/open/floor/carpet/nanoweave/beige,
@@ -350,10 +349,10 @@
 /obj/machinery/door/window/westright{
 	dir = 2
 	},
-/obj/machinery/holopad,
 /obj/structure/chair/comfy/teal{
 	dir = 1
 	},
+/obj/machinery/holopad/emergency/clown,
 /turf/open/floor/carpet/nanoweave/red,
 /area/ship/bridge)
 "Yx" = (

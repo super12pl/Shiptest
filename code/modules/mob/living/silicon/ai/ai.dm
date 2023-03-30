@@ -120,13 +120,13 @@
 			to_chat(src, "<span class='userdanger'>You have been installed as an AI! </span>")
 			to_chat(src, "<span class='danger'>You must obey your silicon laws above all else. Your objectives will consider you to be dead.</span>")
 
-	to_chat(src, "<B>You are playing the station's AI. The AI cannot move, but can interact with many objects while viewing them (through cameras).</B>")
-	to_chat(src, "<B>To look at other parts of the station, click on yourself to get a camera menu.</B>")
+	to_chat(src, "<B>You are playing as an AI. AI cannot move, but can interact with many objects while viewing them (through cameras).</B>")
+	to_chat(src, "<B>To look at other parts of your vessel, click on yourself to get a camera menu.</B>")
 	to_chat(src, "<B>While observing through a camera, you can use most (networked) devices which you can see, such as computers, APCs, intercoms, doors, etc.</B>")
 	to_chat(src, "To use something, simply click on it.")
 	to_chat(src, "Use say :b to speak to your cyborgs through binary.")
 	to_chat(src, "For department channels, use the following say commands:")
-	to_chat(src, ":o - AI Private, :c - Command, :s - Security, :e - Engineering, :u - Supply, :v - Service, :m - Medical, :n - Science.")
+	to_chat(src, ":o - AI Private, :c - Command.")
 	show_laws()
 	to_chat(src, "<b>These laws may be changed by other players, or by you being the traitor.</b>")
 
@@ -134,7 +134,7 @@
 
 	create_eye()
 	if(client)
-		apply_pref_name("ai",client)
+		INVOKE_ASYNC(src, .proc/apply_pref_name,"ai",client)
 
 	set_core_display_icon()
 
@@ -306,7 +306,7 @@
 	if(!target)
 		return
 
-	if (ai.get_virtual_z_level() != target.get_virtual_z_level())
+	if (ai.virtual_z() != target.virtual_z())
 		return FALSE
 
 	if (istype(loc, /obj/item/aicard))
@@ -389,7 +389,7 @@
 		if(target.len)
 			ai_actual_track(pick(target))
 		else
-			to_chat(src, "Target is not on or near any active cameras on the station.")
+			to_chat(src, "Target is not on or near any active cameras on your network.")
 		return
 	if (href_list["ai_take_control"]) //Mech domination
 		var/obj/mecha/M = locate(href_list["ai_take_control"]) in GLOB.mechas_list
@@ -429,7 +429,7 @@
 		view_core()
 		return
 	// ok, we're alive, camera is good and in our network...
-	eyeobj.setLoc(get_turf(C))
+	eyeobj.setLoc(get_turf(C), TRUE)
 	return TRUE
 
 /mob/living/silicon/ai/proc/botcall()
@@ -466,7 +466,7 @@
 	call_bot_cooldown = 0
 
 /mob/living/silicon/ai/triggerAlarm(class, area/home, cameras, obj/source)
-	if(source.get_virtual_z_level() != get_virtual_z_level())
+	if(source.virtual_z() != virtual_z())
 		return
 	var/list/our_sort = alarms[class]
 	for(var/areaname in our_sort)
@@ -554,7 +554,7 @@
 
 	for (var/obj/machinery/camera/C as anything in GLOB.cameranet.cameras)
 		var/list/tempnetwork = C.network
-		if(!(C.get_virtual_z_level() == get_virtual_z_level() || ("ss13" in tempnetwork)))
+		if(!(C.virtual_z() == virtual_z() || ("ss13" in tempnetwork)))
 			continue
 		if(!C.can_use())
 			continue
@@ -577,7 +577,7 @@
 			if(!C.can_use())
 				continue
 			if(network in C.network)
-				U.eyeobj.setLoc(get_turf(C))
+				U.eyeobj.setLoc(get_turf(C), TRUE)
 				break
 	to_chat(src, "<span class='notice'>Switched to the \"[uppertext(network)]\" camera network.</span>")
 //End of code by Mord_Sith
@@ -741,10 +741,6 @@
 	if (radio)
 		radio.interact(src)
 
-/mob/living/silicon/ai/proc/set_syndie_radio()
-	if(radio)
-		radio.make_syndie()
-
 /mob/living/silicon/ai/proc/set_automatic_say_channel()
 	set name = "Set Auto Announce Mode"
 	set desc = "Modify the default radio setting for your automatic announcements."
@@ -850,7 +846,7 @@
 	module_picker.ui_interact(owner)
 
 /mob/living/silicon/ai/proc/add_malf_picker()
-	to_chat(src, "In the top left corner of the screen you will find the Malfunction Modules button, where you can purchase various abilities, from upgraded surveillance to station ending doomsday devices.")
+	to_chat(src, "In the top left corner of the screen you will find the Malfunction Modules button, where you can purchase various abilities, from upgraded surveillance to sector-destroy doomsday devices.")
 	to_chat(src, "You are also capable of hacking APCs, which grants you more points to spend on your Malfunction powers. The drawback is that a hacked APC will give you away if spotted by the crew. Hacking an APC takes 60 seconds.")
 	view_core() //A BYOND bug requires you to be viewing your core before your verbs update
 	malf_picker = new /datum/module_picker
@@ -916,7 +912,7 @@
 		to_chat(src, "Hack complete. \The [apc] is now under your exclusive control.")
 		apc.update_icon()
 
-/mob/living/silicon/ai/verb/deploy_to_shell(var/mob/living/silicon/robot/target)
+/mob/living/silicon/ai/verb/deploy_to_shell(mob/living/silicon/robot/target)
 	set category = "AI Commands"
 	set name = "Deploy to Shell"
 
@@ -1015,9 +1011,37 @@
 	else if(.)
 		REMOVE_TRAIT(src, TRAIT_INCAPACITATED, POWER_LACK_TRAIT)
 
-
 /mob/living/silicon/on_handsblocked_start()
 	return // AIs have no hands
 
 /mob/living/silicon/on_handsblocked_end()
 	return // AIs have no hands
+
+/mob/living/silicon/ai/verb/wipe_core()
+	set name = "Wipe Core"
+	set category = "OOC"
+	set desc = "Wipe your core. This is functionally equivalent to cryo, freeing up your job slot."
+
+	// Guard against misclicks, this isn't the sort of thing we want happening accidentally
+	if(tgui_alert("WARNING: This will immediately wipe your core and ghost you, removing your character from the round permanently (similar to cryo). Are you entirely sure you want to do this?", "Wipe Core", list("No", "Yes")) != "Yes")
+		return
+
+	// We warned you.
+	var/obj/structure/AIcore/latejoin_inactive/inactivecore = New(loc)
+	transfer_fingerprints_to(inactivecore)
+
+	if(GLOB.announcement_systems.len)
+		var/obj/machinery/announcement_system/announcer = pick(GLOB.announcement_systems)
+		announcer.announce("AIWIPE", real_name, mind.assigned_role, list())
+
+	if(mind.objectives.len)
+		mind.objectives.Cut()
+		mind.special_role = null
+
+	if(!get_ghost(1))
+		if(world.time < 30 * 600)//before the 30 minute mark
+			ghostize(0) // Players despawned too early may not re-enter the game
+	else
+		ghostize(1)
+
+	QDEL_NULL(src)

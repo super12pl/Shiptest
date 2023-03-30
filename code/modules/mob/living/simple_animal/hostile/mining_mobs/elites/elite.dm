@@ -11,10 +11,10 @@
 	robust_searching = TRUE
 	ranged_ignores_vision = TRUE
 	ranged = TRUE
-	obj_damage = 5
+	obj_damage = 100
 	vision_range = 6
 	aggro_vision_range = 18
-	environment_smash = ENVIRONMENT_SMASH_NONE  //This is to prevent elites smashing up the mining station, we'll make sure they can smash minerals fine below.
+	environment_smash = ENVIRONMENT_SMASH_MINERALS  //This is to prevent elites smashing up the mining station, we'll make sure they can smash minerals fine below.
 	harm_intent_damage = 0 //Punching elites gets you nowhere
 	stat_attack = HARD_CRIT
 	layer = LARGE_MOB_LAYER
@@ -54,7 +54,7 @@
 		M.gets_drilled()
 
 //Elites can't talk (normally)!
-/mob/living/simple_animal/hostile/asteroid/elite/say(message, bubble_type, var/list/spans = list(), sanitize = TRUE, datum/language/language = null, ignore_spam = FALSE, forced = null)
+/mob/living/simple_animal/hostile/asteroid/elite/say(message, bubble_type, list/spans = list(), sanitize = TRUE, datum/language/language = null, ignore_spam = FALSE, forced = null)
 	if(can_talk)
 		. = ..()
 		return TRUE
@@ -92,6 +92,7 @@ While using this makes the system rely on OnFire, it still gives options for tim
 	icon = 'icons/obj/lavaland/tumor.dmi'
 	icon_state = "tumor"
 	pixel_x = -16
+	base_pixel_x = -16
 	light_color = COLOR_SOFT_RED
 	light_range = 3
 	anchored = TRUE
@@ -235,17 +236,16 @@ While using this makes the system rely on OnFire, it still gives options for tim
 	playsound(loc,'sound/effects/tendril_destroyed.ogg', 200, 0, 50, TRUE, TRUE)
 	visible_message("<span class='boldwarning'>[src] begins to convulse violently before beginning to dissipate.</span>")
 	visible_message("<span class='boldwarning'>As [src] closes, something is forced up from down below.</span>")
-	var/obj/structure/closet/crate/necropolis/tendril/lootbox = new /obj/structure/closet/crate/necropolis/tendril(loc)
+	var/obj/structure/closet/crate/necropolis/tendril/greater/lootbox = new /obj/structure/closet/crate/necropolis/tendril/greater(loc)
 	if(!boosted)
 		mychild = null
 		activator = null
 		qdel(src)
 		return
-	var/lootpick = rand(1, 2)
-	if(lootpick == 1 && mychild.loot_drop != null)
+	if(mychild.loot_drop != null)
 		new mychild.loot_drop(lootbox)
-	else
-		new /obj/item/tumor_shard(lootbox)
+		if(prob(25))
+			new /obj/item/tumor_shard(lootbox)
 	mychild = null
 	activator = null
 	qdel(src)
@@ -262,7 +262,7 @@ While using this makes the system rely on OnFire, it still gives options for tim
 		mychild.playsound_local(get_turf(mychild), 'sound/effects/magic.ogg', 40, 0)
 		to_chat(mychild, "<span class='boldwarning'>As the life in the activator's eyes fade, the forcefield around you dies out and you feel your power subside.\nDespite this inferno being your home, you feel as if you aren't welcome here anymore.\nWithout any guidance, your purpose is now for you to decide.</span>")
 		to_chat(mychild, "<b>Your max health has been halved, but can now heal by standing on your tumor.  Note, it's your only way to heal.\nBear in mind, if anyone interacts with your tumor, you'll be resummoned here to carry out another fight.  In such a case, you will regain your full max health.\nAlso, be weary of your fellow inhabitants, they likely won't be happy to see you!</b>")
-		to_chat(mychild, "<span class='big bold'>Note that you are a lavaland monster, and thus not allied to the station.  You should not cooperate or act friendly with any station crew unless under extreme circumstances!</span>")
+		to_chat(mychild, "<span class='big bold'>Note that you are an alien entity, and thus not allied to the sector. Your path now is up to you.</span>")
 
 /obj/item/tumor_shard
 	name = "tumor shard"

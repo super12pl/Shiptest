@@ -33,7 +33,7 @@
 	else
 		. += "<span class='notice'>You might be able to build ontop of it with some <i>tiles</i>...</span>"
 
-/turf/open/floor/plating/Initialize()
+/turf/open/floor/plating/Initialize(mapload, inherited_virtual_z)
 	if (!broken_states)
 		broken_states = list("platingdmg1", "platingdmg2", "platingdmg3")
 	if (!burnt_states)
@@ -47,7 +47,7 @@
 /turf/open/floor/plating/update_icon()
 	if(!..())
 		return
-	if(!broken && !burnt)
+	if(!broken && !burnt && icon_plating)
 		icon_state = icon_plating //Because asteroids are 'platings' too.
 
 /turf/open/floor/plating/attackby(obj/item/C, mob/user, params)
@@ -107,7 +107,8 @@
 	..()
 	if((broken || burnt) && I.use_tool(src, user, 0, volume=80))
 		to_chat(user, "<span class='danger'>You fix some dents on the broken plating.</span>")
-		icon_state = icon_plating
+		if(icon_plating)
+			icon_state = icon_plating
 		burnt = FALSE
 		broken = FALSE
 

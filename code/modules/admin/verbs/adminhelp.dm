@@ -120,7 +120,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	if(C.current_ticket)
 		var/datum/admin_help/T = C.current_ticket
 		T.AddInteraction("Client disconnected.")
-		SSblackbox.LogAhelp(T, "Disconnected", "Client disconnected", C.ckey)
+		SSblackbox.LogAhelp(T.id, "Disconnected", "Client disconnected", C.ckey)
 		T.initiator = null
 
 //Get a ticket given a ckey
@@ -247,6 +247,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 		ref_src = "[REF(src)]"
 	. = " (<A HREF='?_src_=holder;[HrefToken(TRUE)];ahelp=[ref_src];ahelp_action=reject'>REJT</A>)"
 	. += " (<A HREF='?_src_=holder;[HrefToken(TRUE)];ahelp=[ref_src];ahelp_action=icissue'>IC</A>)"
+	. += " (<A HREF='?_src_=holder;[HrefToken(TRUE)];ahelp=[ref_src];ahelp_action=skillissue'>SKILL</A>)"
 	. += " (<A HREF='?_src_=holder;[HrefToken(TRUE)];ahelp=[ref_src];ahelp_action=close'>CLOSE</A>)"
 	. += " (<A HREF='?_src_=holder;[HrefToken(TRUE)];ahelp=[ref_src];ahelp_action=resolve'>RSLVE</A>)"
 
@@ -406,6 +407,25 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	SSblackbox.LogAhelp(id, "IC Issue", "Marked as IC issue by [usr.key]", null,  usr.ckey)
 	Resolve(silent = TRUE)
 
+//Resolve ticket and inform user that they have a skill issue
+/datum/admin_help/proc/SkillIssue(key_name = key_name_admin(usr))
+	if(state != AHELP_ACTIVE)
+		return
+
+	var/msg = "<font color='red' size='4'><b>- AdminHelp marked as skill issue! -</b></font><br>"
+	msg += "<font color='red'>Your issue has been determined by an administrator to be a skill issue and does NOT require administrator intervention at this time. For further resolution you should pursue options that involve being better at the game.</font>"
+
+	if(initiator)
+		to_chat(initiator, msg, confidential = TRUE)
+
+	SSblackbox.record_feedback("tally", "ahelp_stats", 1, "Skill")
+	msg = "Ticket [TicketHref("#[id]")] marked as skill issue by [key_name]"
+	message_admins(msg)
+	log_admin_private(msg)
+	AddInteraction("Marked as skill issue by [key_name]")
+	SSblackbox.LogAhelp(id, "Skill Issue", "Marked as skill issue by [usr.key]", null,  usr.ckey)
+	Resolve(silent = TRUE)
+
 //Show the ticket panel
 /datum/admin_help/proc/TicketPanel()
 	var/list/dat = list("<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'><title>Ticket #[id]</title></head>")
@@ -462,6 +482,8 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 			usr.client.cmd_ahelp_reply(initiator)
 		if("icissue")
 			ICIssue()
+		if("skillissue")
+			SkillIssue()
 		if("close")
 			Close()
 		if("resolve")
@@ -609,18 +631,18 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	world.TgsTargetedChatBroadcast("[msg] | [msg2]", TRUE)
 
 /**
-  * Sends a message to a set of cross-communications-enabled servers using world topic calls
-  *
-  * Arguments:
-  * * source - Who sent this message
-  * * msg - The message body
-  * * type - The type of message, becomes the topic command under the hood
-  * * target_servers - A collection of servers to send the message to, defined in config
-  * * additional_data - An (optional) associated list of extra parameters and data to send with this world topic call
-  */
+ * Sends a message to a set of cross-communications-enabled servers using world topic calls
+ *
+ * Arguments:
+ * * source - Who sent this message
+ * * msg - The message body
+ * * type - The type of message, becomes the topic command under the hood
+ * * target_servers - A collection of servers to send the message to, defined in config
+ * * additional_data - An (optional) associated list of extra parameters and data to send with this world topic call
+ */
 /proc/send2otherserver(source, msg, type = "Ahelp", target_servers, list/additional_data = list())
 	if(!CONFIG_GET(string/comms_key))
-		debug_world_log("Server cross-comms message not sent for lack of configured key")
+		debug2_world_log("Server cross-comms message not sent for lack of configured key")
 		return
 
 	var/our_id = CONFIG_GET(string/cross_comms_name)
@@ -643,7 +665,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	if (auth)
 		var/comms_key = CONFIG_GET(string/comms_key)
 		if(!comms_key)
-			debug_world_log("Server cross-comms message not sent for lack of configured key")
+			debug2_world_log("Server cross-comms message not sent for lack of configured key")
 			return
 		message["key"] = comms_key
 	var/list/servers = CONFIG_GET(keyed_list/cross_server)

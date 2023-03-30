@@ -6,13 +6,12 @@ SUBSYSTEM_DEF(icon_smooth)
 	flags = SS_TICKER
 
 	///Blueprints assemble an image of what pipes/manifolds/wires look like on initialization, and thus should be taken after everything's been smoothed
-	var/list/blueprint_queue = list()
 	var/list/smooth_queue = list()
 	var/list/deferred = list()
 
 /datum/controller/subsystem/icon_smooth/fire()
 	var/list/cached = smooth_queue
-	while(length(cached))
+	while(cached.len)
 		var/atom/smoothing_atom = cached[length(cached)]
 		cached.len--
 		if(QDELETED(smoothing_atom) || !(smoothing_atom.smoothing_flags & SMOOTH_QUEUED))
@@ -38,23 +37,13 @@ SUBSYSTEM_DEF(icon_smooth)
 	var/list/queue = smooth_queue
 	smooth_queue = list()
 
-	while(length(queue))
+	while(queue.len)
 		var/atom/smoothing_atom = queue[length(queue)]
 		queue.len--
 		if(QDELETED(smoothing_atom) || !(smoothing_atom.smoothing_flags & SMOOTH_QUEUED) || smoothing_atom.z <= 2)
 			continue
 		smoothing_atom.smooth_icon()
 		CHECK_TICK
-
-	queue = blueprint_queue
-	blueprint_queue = list()
-
-	for(var/item in queue)
-		var/atom/movable/movable_item = item
-		if(!isturf(movable_item.loc))
-			continue
-		var/turf/item_loc = movable_item.loc
-		item_loc.add_blueprints(movable_item)
 
 	return ..()
 
@@ -70,5 +59,4 @@ SUBSYSTEM_DEF(icon_smooth)
 /datum/controller/subsystem/icon_smooth/proc/remove_from_queues(atom/thing)
 	thing.smoothing_flags &= ~SMOOTH_QUEUED
 	smooth_queue -= thing
-	blueprint_queue -= thing
 	deferred -= thing

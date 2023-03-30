@@ -78,7 +78,7 @@
 
 /obj/item/clothing/head/collectable/flatcap
 	name = "collectable flat cap"
-	desc = "A collectible farmer's flat cap!"
+	desc = "A collectible laborer's flat cap! Smells like No. 9 coal..."
 	icon_state = "flat_cap"
 	item_state = "detective"
 
@@ -133,7 +133,7 @@
 /obj/item/clothing/head/collectable/HoP
 	name = "collectable HoP hat"
 	desc = "It's your turn to demand excessive paperwork, signatures, stamps, and hire more clowns! Papers, please!"
-	icon_state = "hopcap"
+	icon_state = "hopcap_nt"
 	dog_fashion = /datum/dog_fashion/head/head_of_personnel
 
 /obj/item/clothing/head/collectable/thunderdome

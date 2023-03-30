@@ -137,7 +137,7 @@
 	..()
 
 /turf/closed/wall/mineral/plasma/proc/PlasmaBurn(temperature)
-	new girder_type(src)
+	create_girder()
 	ScrapeAway()
 	var/turf/open/T = src
 	T.atmos_spawn_air("plasma=400;TEMP=[temperature]")
@@ -170,13 +170,16 @@
 	smoothing_groups = list(SMOOTH_GROUP_CLOSED_TURFS, SMOOTH_GROUP_WALLS, SMOOTH_GROUP_WOOD_WALLS)
 	canSmoothWith = list(SMOOTH_GROUP_WOOD_WALLS)
 
+/turf/closed/wall/mineral/wood/nonmetal/icecropolis
+	baseturfs = /turf/open/indestructible/necropolis/air
+
 /turf/closed/wall/mineral/wood/attackby(obj/item/W, mob/user)
 	if(W.get_sharpness() && W.force)
 		var/duration = (48/W.force) * 2 //In seconds, for now.
 		if(istype(W, /obj/item/hatchet) || istype(W, /obj/item/fireaxe))
 			duration /= 4 //Much better with hatchets and axes.
 		if(do_after(user, duration*10, target=src)) //Into deciseconds.
-			dismantle_wall(FALSE,FALSE)
+			dismantle_wall(devastated = FALSE)
 			return
 	return ..()
 
@@ -195,6 +198,9 @@
 	smoothing_flags = SMOOTH_BITMASK
 	smoothing_groups = list(SMOOTH_GROUP_CLOSED_TURFS, SMOOTH_GROUP_WALLS, SMOOTH_GROUP_IRON_WALLS)
 	canSmoothWith = list(SMOOTH_GROUP_IRON_WALLS)
+
+/turf/closed/wall/mineral/iron/icecropolis
+	baseturfs = /turf/open/indestructible/necropolis/air
 
 /turf/closed/wall/mineral/snow
 	name = "packed snow wall"
@@ -232,7 +238,7 @@
 /turf/closed/wall/mineral/titanium //has to use this path due to how building walls works
 	name = "wall"
 	desc = "A light-weight titanium wall used in shuttles."
-	icon = 'whitesands/icons/turf/walls/shuttle_wall.dmi'
+	icon = 'icons/turf/walls/shuttle_wall.dmi'
 	icon_state = "shuttle_wall-0"
 	base_icon_state = "shuttle_wall"
 	explosion_block = 3
@@ -248,7 +254,7 @@
 	canSmoothWith = list(SMOOTH_GROUP_TITANIUM_WALLS_EXTERIOR, SMOOTH_GROUP_AIRLOCK, SMOOTH_GROUP_SHUTTLE_PARTS)
 
 /turf/closed/wall/mineral/titanium/nodiagonal
-	icon = 'whitesands/icons/turf/walls/shuttle_wall.dmi'
+	icon = 'icons/turf/walls/shuttle_wall.dmi'
 	icon_state = "map-shuttle_nd"
 	base_icon_state = "shuttle_wall"
 	smoothing_flags = SMOOTH_BITMASK
@@ -265,9 +271,9 @@
 
 //sub-type to be used for interior shuttle walls
 //won't get an underlay of the destination turf on shuttle move
-/turf/closed/wall/mineral/titanium/interior/copyTurf(turf/T)
+/turf/closed/wall/mineral/titanium/interior/copyTurf(turf/T, copy_air, flags)
 	if(T.type != type)
-		T.ChangeTurf(type)
+		T.ChangeTurf(type, null, flags)
 		if(underlays.len)
 			T.underlays = underlays
 	if(T.icon_state != icon_state)
@@ -342,9 +348,9 @@
 	..()
 
 //have to copypaste this code
-/turf/closed/wall/mineral/plastitanium/interior/copyTurf(turf/T)
+/turf/closed/wall/mineral/plastitanium/interior/copyTurf(turf/T, copy_air, flags)
 	if(T.type != type)
-		T.ChangeTurf(type)
+		T.ChangeTurf(type, null, flags)
 		if(underlays.len)
 			T.underlays = underlays
 	if(T.icon_state != icon_state)

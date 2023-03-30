@@ -81,6 +81,11 @@
 	if(data["blood_DNA"])
 		B.add_blood_DNA(list(data["blood_DNA"] = data["blood_type"]))
 
+/datum/reagent/blood/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		mytray.adjustPests(rand(2,3))
+
 /datum/reagent/liquidgibs
 	name = "Liquid gibs"
 	color = "#CC4633"
@@ -192,6 +197,14 @@
 		M.ExtinguishMob()
 	..()
 
+///For weird backwards situations where water manages to get added to trays nutrients, as opposed to being snowflaked away like usual.
+/datum/reagent/water/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		mytray.adjustWater(round(chems.get_reagent_amount(type) * 1))
+		//You don't belong in this world, monster!
+		chems.remove_reagent(/datum/reagent/water, chems.get_reagent_amount(type))
+
 /datum/reagent/water/dip_object(obj/item/I, mob/user, obj/item/reagent_containers/H)
 	. = ..()
 	if(istype(I, /obj/item/stock_parts/capacitor))
@@ -200,6 +213,12 @@
 		H.reagents.add_reagent(/datum/reagent/hydrogen, (removed/3)*2)
 		return TRUE
 	return
+
+/datum/reagent/water/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray)
+	if(chems.has_reagent(type, 1))
+		mytray.adjustWater(round(chems.get_reagent_amount(type)))
+		//You don't belong in this world, monster!
+		chems.remove_reagent(/datum/reagent/water, chems.get_reagent_amount(type))
 
 /datum/reagent/water/holywater
 	name = "Holy Water"
@@ -262,6 +281,15 @@
 		for(var/obj/effect/rune/R in T)
 			qdel(R)
 	T.Bless()
+
+// Holy water. Mostly the same as water, it also heals the plant a little with the power of the spirits. Also ALSO increases instability.
+/datum/reagent/water/holywater/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		mytray.adjustWater(round(chems.get_reagent_amount(type)))
+		mytray.adjustHealth(round(chems.get_reagent_amount(type) * 0.1))
+		if(myseed)
+			myseed.adjust_instability(round(chems.get_reagent_amount(type) * 0.15))
 
 /datum/reagent/water/hollowwater
 	name = "Hollow Water"
@@ -335,7 +363,8 @@
 	name = "Hell Water"
 	description = "YOUR FLESH! IT BURNS!"
 	taste_description = "burning"
-	process_flags = ORGANIC | SYNTHETIC //WS Edit - IPCs
+	accelerant_quality = 20
+	process_flags = ORGANIC | SYNTHETIC
 
 /datum/reagent/hellwater/on_mob_life(mob/living/carbon/M)
 	M.fire_stacks = min(5,M.fire_stacks + 3)
@@ -382,7 +411,7 @@
 	if(ishuman(M))
 		if(method == PATCH || method == VAPOR)
 			var/mob/living/carbon/human/N = M
-			if(N.dna.species.id == "human")
+			if(N.dna.species.id == SPECIES_HUMAN)
 				switch(N.skin_tone)
 					if("african1")
 						N.skin_tone = "african2"
@@ -538,7 +567,6 @@
 	color = "#13BC5E" // rgb: 19, 188, 94
 	race = list(/datum/species/jelly/slime,
 						/datum/species/human,
-						/datum/species/human/felinid,
 						/datum/species/lizard,
 						/datum/species/fly,
 						/datum/species/moth,
@@ -548,15 +576,8 @@
 						/datum/species/squid)
 	process_flags = ORGANIC | SYNTHETIC
 
-/datum/reagent/mutationtoxin/felinid
-	name = "Felinid Mutation Toxin"
-	color = "#5EFF3B" //RGB: 94, 255, 59
-	race = /datum/species/human/felinid
-	process_flags = ORGANIC | SYNTHETIC //WS Edit - IPCs
-	taste_description = "something nyat good"
-
 /datum/reagent/mutationtoxin/lizard
-	name = "lizard Mutation Toxin"
+	name = "Sarathi Mutation Toxin"
 	description = "A lizarding toxin."
 	color = "#5EFF3B" //RGB: 94, 255, 59
 	race = /datum/species/lizard
@@ -648,11 +669,12 @@
 	race = /datum/species/squid
 	process_flags = ORGANIC | SYNTHETIC
 
-/datum/reagent/mutationtoxin/tesh //crying
-	name = "Teshari Mutation Toxin"
+/datum/reagent/mutationtoxin/kepi //crying
+	name = "Kepori Mutation Toxin"
 	description = "A feathery toxin."
-	race = /datum/species/teshari
+	race = /datum/species/kepori
 	process_flags = ORGANIC | SYNTHETIC
+	taste_description = "a familiar white meat"
 
 //BLACKLISTED RACES
 /datum/reagent/mutationtoxin/skeleton
@@ -675,7 +697,7 @@
 	name = "Zombie Mutation Toxin"
 	description = "An undead toxin... kinda..."
 	color = "#5EFF3B" //RGB: 94, 255, 59
-	race = /datum/species/krokodil_addict //Not the infectious kind. The days of xenobio zombie outbreaks are long past.
+	race = /datum/species/human/krokodil_addict //Not the infectious kind. The days of xenobio zombie outbreaks are long past.
 	process_flags = ORGANIC | SYNTHETIC
 
 /datum/reagent/mutationtoxin/ash
@@ -874,6 +896,14 @@
 		return TRUE
 	return
 
+/datum/reagent/chlorine/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		mytray.adjustHealth(-round(chems.get_reagent_amount(type)))
+		mytray.adjustToxic(round(chems.get_reagent_amount(type) * 1.5))
+		mytray.adjustWater(-round(chems.get_reagent_amount(type) * 0.5))
+		mytray.adjustWeeds(-rand(1,3))
+
 /datum/reagent/fluorine
 	name = "Fluorine"
 	description = "A comically-reactive chemical element. The universe does not want this stuff to exist in this form in the slightest."
@@ -886,6 +916,14 @@
 	M.adjustToxLoss(1*REM, 0)
 	. = 1
 	..()
+
+/datum/reagent/fluorine/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		mytray.adjustHealth(-round(chems.get_reagent_amount(type) * 2))
+		mytray.adjustToxic(round(chems.get_reagent_amount(type) * 2.5))
+		mytray.adjustWater(-round(chems.get_reagent_amount(type) * 0.5))
+		mytray.adjustWeeds(-rand(1,4))
 
 /datum/reagent/sodium
 	name = "Sodium"
@@ -1021,6 +1059,13 @@
 	process_flags = ORGANIC | SYNTHETIC //WS Edit - IPCs
 	//WS End
 
+/datum/reagent/uranium/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	. = ..()
+	mytray.mutation_roll(user)
+	if(chems.has_reagent(type, 1))
+		mytray.adjustHealth(-round(chems.get_reagent_amount(type) * 1))
+		mytray.adjustToxic(round(chems.get_reagent_amount(type) * 2))
+
 /datum/reagent/uranium/on_mob_life(mob/living/carbon/M)
 	M.apply_effect(irradiation_level/M.metabolism_efficiency,EFFECT_IRRADIATE,0)
 	..()
@@ -1053,6 +1098,14 @@
 
 /datum/reagent/uranium/radium/dip_object(obj/item/I, mob/user, obj/item/reagent_containers/H)
 	return FALSE
+
+/datum/reagent/radium/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		mytray.adjustHealth(-round(chems.get_reagent_amount(type) * 2.5))
+		mytray.adjustToxic(round(chems.get_reagent_amount(type) * 1.5))
+		if(myseed && chems.has_reagent(type, 1))
+			myseed.adjust_instability(3)
 
 /datum/reagent/bluespace
 	name = "Bluespace Dust"
@@ -1123,7 +1176,8 @@
 	glass_icon_state = "dr_gibb_glass"
 	glass_name = "glass of welder fuel"
 	glass_desc = "Unless you're an industrial tool, this is probably not safe for consumption."
-	process_flags = ORGANIC | SYNTHETIC //WS Edit - IPCs
+	process_flags = ORGANIC | SYNTHETIC
+	accelerant_quality = 10
 
 /datum/reagent/fuel/expose_mob(mob/living/M, method=TOUCH, reac_volume)//Splashing people with welding fuel to make them easy to ignite!
 	if(method == TOUCH || method == VAPOR)
@@ -1150,8 +1204,7 @@
 /datum/reagent/space_cleaner/expose_turf(turf/T, reac_volume)
 	if(reac_volume >= 1)
 		T.wash(clean_types)
-		for(var/am in T)
-			var/atom/movable/movable_content
+		for(var/atom/movable/movable_content in T)
 			if(ismopable(movable_content)) // Mopables will be cleaned anyways by the turf wash
 				continue
 			movable_content.wash(clean_types)
@@ -1282,11 +1335,29 @@
 	color = "#404030" // rgb: 64, 64, 48
 	taste_description = "mordant"
 
+/datum/reagent/ammonia/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	. = ..()
+	// Ammonia is bad ass.
+	if(chems.has_reagent(type, 1))
+		mytray.adjustHealth(round(chems.get_reagent_amount(type) * 0.12))
+		if(myseed && prob(10))
+			myseed.adjust_yield(0.5)
+			myseed.adjust_instability(-0.5)
+
 /datum/reagent/diethylamine
 	name = "Diethylamine"
 	description = "A secondary amine, mildly corrosive."
 	color = "#604030" // rgb: 96, 64, 48
 	taste_description = "iron"
+
+/datum/reagent/diethylamine/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		mytray.adjustHealth(round(chems.get_reagent_amount(type) * 1))
+		mytray.adjustPests(-rand(1,2))
+		if(myseed)
+			myseed.adjust_yield(round(chems.get_reagent_amount(type) * 1))
+			myseed.adjust_instability(-round(chems.get_reagent_amount(type) * 1))
 
 /datum/reagent/carbondioxide
 	name = "Carbon Dioxide"
@@ -1306,6 +1377,16 @@
 		var/temp = holder ? holder.chem_temp : T20C
 		T.atmos_spawn_air("co2=[reac_volume/5];TEMP=[temp]")
 	return
+
+// This is more bad ass, and pests get hurt by the corrosive nature of it, not the plant. The new trade off is it culls stability.
+/datum/reagent/diethylamine/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		mytray.adjustHealth(round(chems.get_reagent_amount(type) * 1))
+		mytray.adjustPests(-rand(1,2))
+		if(myseed)
+			myseed.adjust_yield(round(chems.get_reagent_amount(type) * 1))
+			myseed.adjust_instability(-round(chems.get_reagent_amount(type) * 1))
 
 /datum/reagent/nitrous_oxide
 	name = "Nitrous Oxide"
@@ -1468,7 +1549,7 @@
 	color = "#FFFFFF" // white
 	random_color_list = list("#FFFFFF") //doesn't actually change appearance at all
 
- /* used by crayons, can't color living things but still used for stuff like food recipes */
+/* used by crayons, can't color living things but still used for stuff like food recipes */
 
 /datum/reagent/colorful_reagent/powder/red/crayon
 	name = "Red Crayon Powder"
@@ -1525,11 +1606,24 @@
 	color = "#376400" // RBG: 50, 100, 0
 	tox_prob = 10
 
+/datum/reagent/plantnutriment/eznutriment/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray)
+	. = ..()
+	if(myseed && chems.has_reagent(type, 1))
+		myseed.adjust_instability(0.2)
+		myseed.adjust_potency(round(chems.get_reagent_amount(type) * 0.3))
+		myseed.adjust_yield(round(chems.get_reagent_amount(type) * 0.1))
+
 /datum/reagent/plantnutriment/left4zednutriment
 	name = "Left 4 Zed"
 	description = "Unstable nutriment that makes plants mutate more often than usual."
 	color = "#1A1E4D" // RBG: 26, 30, 77
 	tox_prob = 25
+
+/datum/reagent/plantnutriment/left4zednutriment/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray)
+	. = ..()
+	if(myseed && chems.has_reagent(type, 1))
+		mytray.adjustHealth(round(chems.get_reagent_amount(type) * 0.1))
+		myseed.adjust_instability(round(chems.get_reagent_amount(type) * 0.2))
 
 /datum/reagent/plantnutriment/robustharvestnutriment
 	name = "Robust Harvest"
@@ -1537,8 +1631,38 @@
 	color = "#9D9D00" // RBG: 157, 157, 0
 	tox_prob = 15
 
+/datum/reagent/plantnutriment/robustharvestnutriment/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray)
+	. = ..()
+	if(myseed && chems.has_reagent(type, 1))
+		myseed.adjust_instability(-0.25)
+		myseed.adjust_potency(round(chems.get_reagent_amount(type) * 0.1))
+		myseed.adjust_yield(round(chems.get_reagent_amount(type) * 0.2))
 
+/datum/reagent/plantnutriment/endurogrow
+	name = "Enduro Grow"
+	description = "A specialized nutriment, which decreases product quantity and potency, but strengthens the plants endurance."
+	color = "#a06fa7" // RBG: 160, 111, 167
+	tox_prob = 15
 
+/datum/reagent/plantnutriment/endurogrow/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray)
+	. = ..()
+	if(myseed && chems.has_reagent(type, 1))
+		myseed.adjust_potency(-round(chems.get_reagent_amount(type) * 0.1))
+		myseed.adjust_yield(-round(chems.get_reagent_amount(type) * 0.075))
+		myseed.adjust_endurance(round(chems.get_reagent_amount(type) * 0.35))
+
+/datum/reagent/plantnutriment/liquidearthquake
+	name = "Liquid Earthquake"
+	description = "A specialized nutriment, which increases the plant's production speed, as well as it's susceptibility to weeds."
+	color = "#912e00" // RBG: 145, 46, 0
+	tox_prob = 25
+
+/datum/reagent/plantnutriment/liquidearthquake/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray)
+	. = ..()
+	if(myseed && chems.has_reagent(type, 1))
+		myseed.adjust_weed_rate(round(chems.get_reagent_amount(type) * 0.1))
+		myseed.adjust_weed_chance(round(chems.get_reagent_amount(type) * 0.3))
+		myseed.adjust_production(-round(chems.get_reagent_amount(type) * 0.075))
 
 
 
@@ -1742,6 +1866,12 @@
 		return TRUE
 	return
 
+/datum/reagent/ash/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		mytray.adjustHealth(round(chems.get_reagent_amount(type) * 1))
+		mytray.adjustWeeds(-1)
+
 /datum/reagent/acetone
 	name = "Acetone"
 	description = "A slick, slightly carcinogenic liquid. Has a multitude of mundane uses in everyday life."
@@ -1853,6 +1983,15 @@
 	reagent_state = LIQUID
 	color = "#60A584" // rgb: 96, 165, 132
 	taste_description = "cool salt"
+
+/datum/reagent/saltpetre/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
+	. = ..()
+	if(chems.has_reagent(type, 1))
+		var/salt = chems.get_reagent_amount(type)
+		mytray.adjustHealth(round(salt * 0.18))
+		if(myseed)
+			myseed.adjust_production(-round(salt/10)-prob(salt%10))
+			myseed.adjust_potency(round(salt))
 
 /datum/reagent/lye
 	name = "Lye"
@@ -2273,3 +2412,340 @@
 	color = "#10cca6" //RGB: 16, 204, 166
 	taste_description = "lifegiving metal"
 	can_synth = FALSE
+
+/datum/reagent/determination //from /tg/ , but since we dont have wounds its just weaker penthrite
+	name = "Determination"
+	description = "For when you need to push on a little more. Do NOT allow near plants."
+	reagent_state = LIQUID
+	color = "#D2FFFA"
+	metabolization_rate = 0.75 * REAGENTS_METABOLISM
+	self_consuming = TRUE
+	taste_description = "pure determination"
+	overdose_threshold = 30
+
+/datum/reagent/determination/on_mob_add(mob/living/M)
+	. = ..()
+	to_chat(M,"<span class='notice'>You feel like your heart can take on the world!")
+	ADD_TRAIT(M, TRAIT_NOSOFTCRIT,type)
+
+/datum/reagent/determination/on_mob_life(mob/living/carbon/human/H)
+	if(H.health <= HEALTH_THRESHOLD_CRIT && H.health > H.crit_threshold)
+
+		H.adjustBruteLoss(-2 * REM, 0)
+		H.adjustOxyLoss(-6 * REM, 0)
+
+		H.losebreath = 0
+
+		H.adjustOrganLoss(ORGAN_SLOT_HEART,max(1,volume/10)) // your heart is barely keeping up!
+
+		H.Jitter(rand(0,2))
+		H.Dizzy(rand(0,2))
+
+
+		if(prob(33))
+			to_chat(H,"<span class='danger'>Your body is trying to give up, but your heart is still beating!</span>")
+	. = ..()
+
+/datum/reagent/determination/on_mob_end_metabolize(mob/living/M)
+	REMOVE_TRAIT(M, TRAIT_NOSOFTCRIT,type)
+	. = ..()
+
+/datum/reagent/determination/overdose_process(mob/living/carbon/human/H)
+	to_chat(H,"<span class='danger'>You feel your heart rupturing in two!</span>")
+	H.adjustStaminaLoss(10)
+	H.adjustOrganLoss(ORGAN_SLOT_HEART,100)
+	H.set_heartattack(TRUE)
+
+/datum/reagent/crystal_reagent
+	name = "Crystal Reagent"
+	description = "A strange crystal substance. Heals faster than omnizine."
+	reagent_state = LIQUID
+	color = "#1B9681"
+	metabolization_rate = 0.5 * REAGENTS_METABOLISM
+	overdose_threshold = 20
+	taste_description = "rocks"
+	var/healing = 0.8
+
+/datum/reagent/crystal_reagent/on_mob_life(mob/living/carbon/M)
+	M.adjustToxLoss(-healing*REM, 0)
+	M.adjustOxyLoss(-healing*REM, 0)
+	M.adjustBruteLoss(-healing*REM, 0)
+	M.adjustFireLoss(-healing*REM, 0)
+	..()
+	. = 1
+
+/datum/reagent/crystal_reagent/overdose_process(mob/living/carbon/human/H) //TODO port bee's regen cores legioning miners, and make it only do that if overdosed on crystal
+	to_chat(H,"<span class='danger'>You feel your heart rupturing in two!</span>")
+	H.adjustStaminaLoss(10)
+	H.adjustOrganLoss(ORGAN_SLOT_HEART,100)
+	H.set_heartattack(TRUE)
+
+/datum/reagent/three_eye
+	name = "Three Eye"
+	taste_description = "liquid starlight"
+	taste_mult = 100
+	description = "Out on the edge of human space, at the limits of scientific understanding and \
+	cultural taboo, people develop and dose themselves with substances that would curl the hair on \
+	a brinker's vatgrown second head. Three Eye is one of the most notorious narcotics to ever come \
+	out of the independant habitats, and has about as much in common with recreational drugs as a \
+	Stok does with an Unathi strike trooper. It is equally effective on humans, Skrell, dionaea and \
+	probably the Captain's cat, and distributing it will get you guaranteed jail time in every \
+	human territory."
+	reagent_state = LIQUID
+	color = "#ccccff"
+	metabolization_rate = 0.5 * REAGENTS_METABOLISM
+	overdose_threshold = 25
+	var/worthy = FALSE
+
+	var/static/list/dose_messages = list(
+		"Your name is called. It is your time.",
+		"You are dissolving. Your hands are wax...",
+		"It all runs together. It all mixes.",
+		"It is done. It is over. You are done. You are over.",
+		"You won't forget. Don't forget. Don't forget.",
+		"Light seeps across the edges of your vision...",
+		"Something slides and twitches within your sinus cavity...",
+		"Your bowels roil. It waits within.",
+		"Your gut churns. You are heavy with potential.",
+		"Your heart flutters. It is winged and caged in your chest.",
+		"There is a precious thing, behind your eyes.",
+		"Everything is ending. Everything is beginning.",
+		"Nothing ends. Nothing begins.",
+		"Wake up. Please wake up.",
+		"Stop it! You're hurting them!",
+		"It's too soon for this. Please go back.",
+		"We miss you. Where are you?",
+		"Come back from there. Please.",
+		"Is it really you?",
+		"He isn't like us. He doesn't belong.",
+		"Don't leave... please...",
+		"You hear a clock ticking. It's getting faster."
+	)
+	var/static/list/overdose_messages = list(
+		"THE SIGNAL THE SIGNAL THE SIGNAL THE SIGNAL",
+		"IT CRIES IT CRIES IT WAITS IT CRIES",
+		"NOT YOURS NOT YOURS NOT YOURS NOT YOURS",
+		"THAT IS NOT FOR YOU",
+		"IT RUNS IT RUNS IT RUNS IT RUNS",
+		"THE BLOOD THE BLOOD THE BLOOD THE BLOOD",
+		"THE LIGHT THE DARK A STAR IN CHAINS",
+		"GET OUT GET OUT GET OUT GET OUT",
+		"NO MORE NO MORE NO MORE"
+	)
+/datum/reagent/three_eye/on_mob_metabolize(mob/living/L)
+	. = ..()
+	//addtimer(CALLBACK(L, /mob.proc/add_client_colour, /datum/client_colour/thirdeye), 1.5 SECONDS)
+	L.add_client_colour(/datum/client_colour/thirdeye)
+	if(L.client?.holder) //You are worthy.
+		worthy = TRUE
+		L.visible_message("<span class='danger'><font size = 6>Grips their head and dances around, collapsing to the floor!</font></span>", \
+		"<span class='danger'><font size = 6>Visions of a realm BYOND your own flash across your eyes, before it all goes black...</font></span>")
+		addtimer(CALLBACK(L, /mob/living.proc/SetSleeping, 40 SECONDS), 10 SECONDS)
+		addtimer(CALLBACK(L.reagents, /datum/reagents.proc/remove_reagent, src.type, src.volume,), 10 SECONDS)
+		return
+
+/datum/reagent/three_eye/on_mob_life(mob/living/carbon/M)
+	. = ..()
+	if(worthy)
+		return
+
+	for(var/datum/reagent/medicine/mannitol/chem in M.reagents.reagent_list)
+		M.reagents.remove_reagent(chem.type, chem.volume)
+
+	M.Jitter(3)
+	M.Dizzy(3)
+	if(prob(0.1) && ishuman(M))
+		var/mob/living/carbon/human/H = M
+		H.seizure()
+		H.adjustOrganLoss(ORGAN_SLOT_BRAIN, rand(2, 4))
+	if(prob(7))
+		to_chat(M, "<span class='warning'><font size = [rand(1,3)]>[pick(dose_messages)]</font></span>")
+
+/datum/reagent/three_eye/overdose_start(mob/living/M)
+	on_mob_metabolize(M) //set worthy
+	if(worthy)
+		overdosed = FALSE
+		return
+
+	if(ishuman(M))
+		var/mob/living/carbon/human/H = M
+		addtimer(CALLBACK(H, /mob/living.proc/seizure), rand(1 SECONDS, 5 SECONDS))
+
+/datum/reagent/three_eye/overdose_process(mob/living/M)
+	. = ..()
+	if(worthy)
+		return
+
+	if(iscarbon(M))
+		var/mob/living/carbon/C = M
+		C.adjustOrganLoss(ORGAN_SLOT_BRAIN, rand(1, 2))
+	if(prob(7))
+		to_chat(M, "<span class='danger'><font size = [rand(2,4)]>[pick(overdose_messages)]</font></span>")
+
+/datum/reagent/three_eye/on_mob_end_metabolize(mob/living/L)
+	. = ..()
+	L.remove_client_colour(/datum/client_colour/thirdeye)
+	if(overdosed && !worthy)
+		to_chat(L, "<span class='danger'><font size = 6>Your mind reels and the world begins to fade away...</font></span>")
+		if(iscarbon(L))
+			var/mob/living/carbon/C = L
+			addtimer(CALLBACK(C, /mob/living/carbon.proc/adjustOrganLoss, ORGAN_SLOT_BRAIN, 200), 5 SECONDS) //Deathblow to the brain
+		else
+			addtimer(CALLBACK(L, /mob/living.proc/gib), 5 SECONDS)
+
+/datum/reagent/cement
+	name = "Cement"
+	description = "A sophisticated binding agent used to produce concrete."
+	color = "#c4c0bc"
+	taste_description = "cement"
+	harmful = TRUE
+	var/potency = 2
+	var/concrete_type = /datum/reagent/concrete
+	var/units_per_aggregate = 5
+
+// make changes to dip_object -- remove H?
+/datum/reagent/cement/dip_object(obj/item/I, mob/user, obj/item/reagent_containers/H)
+	if(!istype(I, /obj/item/stack/ore/glass))
+		return FALSE
+	var/obj/item/stack/ore/glass/aggregate = I
+	// the maximum amount of aggregate we can use
+	var/agg_used = min(round(volume / units_per_aggregate), aggregate.get_amount())
+	if(!agg_used)
+		return FALSE
+	var/amt = agg_used * units_per_aggregate
+	aggregate.use(agg_used)
+	H.reagents.remove_reagent(src.type, amt)
+	H.reagents.add_reagent(concrete_type, amt)
+	return TRUE
+
+/datum/reagent/cement/expose_mob(mob/living/M, method=TOUCH, reac_volume, show_message = 1, touch_protection = 0)
+	. = ..()
+	if(!. || method != INGEST)
+		return
+	var/age = 6
+	if(ishuman(M))
+		var/mob/living/carbon/human/conc_eater = M
+		age = conc_eater.age
+	message_admins("[M] was forced to eat cement when [M.p_they()] [M.p_were()] [age]!")
+	SEND_SIGNAL(M, COMSIG_ADD_MOOD_EVENT, "cement", /datum/mood_event/cement)
+
+/datum/reagent/cement/on_mob_life(mob/living/carbon/M)
+	. = ..()
+	if(prob(min(current_cycle/2, 5)))
+		M.adjustToxLoss(potency*REM)
+	if(prob(min(current_cycle/4, 10)))
+		M.adjustOrganLoss(ORGAN_SLOT_BRAIN,potency*REM)
+
+/datum/reagent/cement/hexement
+	name = "Hexement"
+	description = "An advanced, space-age binding agent used to produce reinforced concrete."
+	color = "#969390"
+	potency = 4
+	concrete_type = /datum/reagent/concrete/hexacrete
+	units_per_aggregate = 2
+
+/datum/reagent/cement/roadmix
+	name = "Road mixture"
+	description = "A mix of cement and asphalt. Looks less tasty than normal cement."
+	color = "#5c6361"
+	potency = 3
+	concrete_type = /datum/reagent/concrete/pavement
+
+/datum/reagent/concrete
+	name = "Concrete"
+	description = "A mix of cement and aggregate, commonly used as a bulk building material."
+	color = "#a8988a"
+	taste_description = "rocks"
+	var/units_per_wall = 10
+	var/units_per_floor = 2
+	var/turf/closed/wall/concrete/wall_type = /turf/closed/wall/concrete
+	var/turf/open/floor/concrete/floor_type = /turf/open/floor/concrete
+
+/datum/reagent/concrete/expose_obj(obj/O, volume)
+	var/girder_type = initial(wall_type.girder_type)
+	if(istype(O, girder_type))
+		return concify_girder(O, volume)
+	if(istype(O, /obj/structure/catwalk))
+		return concify_catwalk(O, volume)
+
+/datum/reagent/concrete/proc/concify_girder(obj/O, volume)
+	if(volume < units_per_wall)
+		return
+	var/turf/open/wall_turf = get_turf(O)
+	if(!istype(wall_turf))
+		return
+	var/turf/closed/wall/concrete/conc_wall = wall_turf.PlaceOnTop(wall_type)
+	O.transfer_fingerprints_to(conc_wall)
+	conc_wall.harden_lvl = 0
+	conc_wall.check_harden()
+	conc_wall.update_stats()
+	qdel(O)
+	return
+
+/datum/reagent/concrete/proc/concify_catwalk(obj/O, volume)
+	if(volume < units_per_floor)
+		return
+	var/turf/open/floor/plating/floor_turf = get_turf(O)
+	if(!istype(floor_turf))
+		return
+	var/turf/open/floor/concrete/conc_floor = floor_turf.PlaceOnTop(floor_type)
+	O.transfer_fingerprints_to(conc_floor)
+	conc_floor.harden_lvl = 0
+	conc_floor.check_harden()
+	conc_floor.update_icon()
+	qdel(O)
+	return
+
+/datum/reagent/concrete/hexacrete
+	name = "Hexacrete"
+	description = "Made with fortified cement, this mix of binder and aggregate is a useful, sturdy building material."
+	color = "#7b6e60"
+	wall_type = /turf/closed/wall/concrete/reinforced
+	floor_type = /turf/open/floor/concrete/reinforced
+
+/datum/reagent/concrete/pavement
+	name = "Pavement"
+	description = "Road surface, blacktop, asphalt concrete, whatever you call it, it's the most common material used in constructing runways for ships and roadways for vehicles."
+	color = "#3f4543"
+	floor_type = /turf/open/floor/concrete/pavement
+
+/datum/reagent/calcium
+	name = "Calcium"
+	description = "A dull gray metal important to bones."
+	reagent_state = SOLID
+	color = "#68675c"
+	metabolization_rate = REAGENTS_METABOLISM
+
+/datum/reagent/ash_fibers
+	name = "Ashen Fibers"
+	description = "Ground plant fibers from a cave fern. Useful for medicines."
+	reagent_state = SOLID
+	color = "#5a4f42"
+	taste_mult = 0
+
+/datum/reagent/titanium
+	name = "Titanium"
+	description = "A light, reflective grey metal used in ship construction."
+	reagent_state = SOLID
+	color = "#c2c2c2"
+
+/datum/reagent/asphalt
+	name = "Asphalt"
+	description = "A dark, viscous liquid. Often found in oil deposits, although sometimes it can seep to the surface."
+	color = "#111212"
+	taste_description = "petroleum"
+
+/datum/reagent/asphalt/on_mob_life(mob/living/carbon/M)
+	. = ..()
+	if(prob(min(current_cycle/2, 5)))
+		M.adjustToxLoss(2*REM)
+	if(prob(min(current_cycle/4, 10)))
+		M.adjustOrganLoss(ORGAN_SLOT_STOMACH,3*REM)
+
+/datum/reagent/mutationtoxin/kobold
+	name = "Kobold Mutation Toxin"
+	description = "An ashen toxin. Something about this seems lesser."
+	color = "#5EFF3B" //RGB: 94, 255, 59
+	race = /datum/species/lizard/ashwalker/kobold
+	process_flags = ORGANIC | SYNTHETIC //WS Edit - IPCs
+	taste_description = "short savagery"

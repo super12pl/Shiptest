@@ -15,6 +15,7 @@
 	var/default_mutation_genes[DNA_MUTATION_BLOCKS] //List of the default genes from this mutation to allow DNA Scanner highlighting
 	var/stability = 100
 	var/scrambled = FALSE //Did we take something like mutagen? In that case we cant get our genes scanned to instantly cheese all the powers.
+	var/current_body_size = BODY_SIZE_NORMAL //This is a size multiplier, it starts at "1".
 
 
 	var/delete_species = TRUE //Set to FALSE when a body is scanned by a cloner to fix #38875. WS Edit - Cloning
@@ -65,6 +66,7 @@
 	new_dna.features = features.Copy()
 	new_dna.species = new species.type
 	new_dna.real_name = real_name
+	new_dna.update_body_size() //Must come after features.Copy()
 	new_dna.mutations = mutations.Copy()
 
 //See mutation.dm for what 'class' does. 'time' is time till it removes itself in decimals. 0 for no timer
@@ -290,6 +292,22 @@
 	return
 
 /////////////////////////// DNA MOB-PROCS //////////////////////
+/datum/dna/proc/update_body_size()
+	if(!holder)
+		return
+	var/desired_size = GLOB.body_sizes[features["body_size"]]
+
+	if(desired_size == current_body_size)
+		return
+
+	if(!features["body_size"])
+		return
+
+	var/change_multiplier = desired_size / current_body_size
+	var/translate = ((change_multiplier-1) * 32) * 0.5
+	holder.transform = holder.transform.Scale(change_multiplier)
+	holder.transform = holder.transform.Translate(0, translate)
+	current_body_size = desired_size
 
 /mob/proc/set_species(datum/species/mrace, icon_update = 1)
 	return
@@ -315,6 +333,18 @@
 		dna.species.on_species_loss(src, new_race, pref_load)
 		var/datum/species/old_species = dna.species
 		dna.species = new_race
+//Solves quirk conflicts on species change if there's any
+		var/list/quirks_to_remove = list()
+		var/list/quirks_resolved = client?.prefs.handle_quirk_conflict("species", new_race, src)
+		for(var/datum/quirk/quirk_instance as anything in roundstart_quirks)
+			quirks_to_remove += quirk_instance.type
+		for(var/quirk_name in quirks_resolved)
+			var/datum/quirk/quirk_instance = SSquirks.quirk_instances[quirk_name]
+			quirks_resolved += quirk_instance.type
+			quirks_resolved -= quirk_name
+		quirks_to_remove -= quirks_resolved
+		for(var/quirk_type in quirks_to_remove)
+			remove_quirk(quirk_type)
 		dna.species.on_species_gain(src, old_species, pref_load)
 		if(ishuman(src))
 			qdel(language_holder)
@@ -325,9 +355,7 @@
 /mob/living/carbon/human/set_species(datum/species/mrace, icon_update = TRUE, pref_load = FALSE)
 	..()
 	if(icon_update)
-		update_body()
 		update_hair()
-		update_body_parts()
 		update_mutations_overlay()// no lizard with human hulk overlay please.
 
 

@@ -14,14 +14,6 @@
 	"}
 
 
-/datum/station_goal/station_shield/on_report()
-	//Unlock
-	var/datum/supply_pack/P = SSshuttle.supply_packs[/datum/supply_pack/engineering/shield_sat]
-	P.special_enabled = TRUE
-
-	P = SSshuttle.supply_packs[/datum/supply_pack/engineering/shield_sat_control]
-	P.special_enabled = TRUE
-
 /datum/station_goal/station_shield/check_completion()
 	if(..())
 		return TRUE
@@ -61,7 +53,7 @@
 
 /obj/machinery/computer/sat_control/proc/toggle(id)
 	for(var/obj/machinery/satellite/S in GLOB.machines)
-		if(S.id == id && S.get_virtual_z_level() == get_virtual_z_level())
+		if(S.id == id && S.virtual_z() == virtual_z())
 			S.toggle()
 
 /obj/machinery/computer/sat_control/ui_data()
@@ -153,7 +145,7 @@
 	if(!active)
 		return
 	for(var/obj/effect/meteor/M in GLOB.meteor_list)
-		if(M.get_virtual_z_level() != get_virtual_z_level())
+		if(M.virtual_z() != virtual_z())
 			continue
 		if(get_dist(M,src) > kill_range)
 			continue

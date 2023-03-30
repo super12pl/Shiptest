@@ -1,7 +1,7 @@
 /obj/item/extinguisher
 	name = "fire extinguisher"
 	desc = "A traditional red fire extinguisher."
-	icon = 'icons/obj/items_and_weapons.dmi'
+	icon = 'icons/obj/extinguisher.dmi'
 	icon_state = "fire_extinguisher0"
 	item_state = "fire_extinguisher"
 	hitsound = 'sound/weapons/smash.ogg'
@@ -238,7 +238,7 @@
 		return
 	EmptyExtinguisher(user)
 
-/obj/item/extinguisher/proc/EmptyExtinguisher(var/mob/user)
+/obj/item/extinguisher/proc/EmptyExtinguisher(mob/user)
 	if(loc == user && reagents.total_volume)
 		reagents.clear_reagents()
 

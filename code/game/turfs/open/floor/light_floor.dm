@@ -47,7 +47,7 @@
 		LIGHT_COLOR_FIRE = image(icon = src.icon, icon_state = "light_on-10")
 		)
 
-/turf/open/floor/light/Initialize()
+/turf/open/floor/light/Initialize(mapload, inherited_virtual_z)
 	. = ..()
 	update_icon()
 	if(!length(lighttile_designs))
@@ -156,12 +156,12 @@
 	can_modify_colour = FALSE
 
 /**
-  * check_menu: Checks if we are allowed to interact with a radial menu
-  *
-  * Arguments:
-  * * user The mob interacting with a menu
-  * * multitool The multitool used to interact with a menu
-  */
+ * check_menu: Checks if we are allowed to interact with a radial menu
+ *
+ * Arguments:
+ * * user The mob interacting with a menu
+ * * multitool The multitool used to interact with a menu
+ */
 /turf/open/floor/light/proc/check_menu(mob/living/user, obj/item/multitool)
 	if(!istype(user))
 		return FALSE

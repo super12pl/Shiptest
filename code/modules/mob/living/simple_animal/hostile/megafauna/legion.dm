@@ -1,21 +1,21 @@
 /**
-  *LEGION
-  *
-  *Legion spawns from the necropolis gate in the far north of lavaland. It is the guardian of the Necropolis and emerges from within whenever an intruder tries to enter through its gate.
-  *Whenever Legion emerges, everything in lavaland will receive a notice via color, audio, and text. This is because Legion is powerful enough to slaughter the entirety of lavaland with little effort. LOL
-  *
-  *It has three attacks.
-  *Spawn Skull. Most of the time it will use this attack. Spawns a single legion skull.
-  *Spawn Sentinel. The legion will spawn up to three sentinels, depending on its size.
-  *CHARGE! The legion starts spinning and tries to melee the player. It will try to flick itself towards the player, dealing some damage if it hits.
-  *
-  *When Legion dies, it will split into three smaller skulls up to three times.
-  *If you kill all of the smaller ones it drops a staff of storms, which allows its wielder to call and disperse ash storms at will and functions as a powerful melee weapon.
-  *
-  *Difficulty: Medium
-  *
-  *SHITCODE AHEAD. BE ADVISED. Also comment extravaganza
-  */
+ *LEGION
+ *
+ *Legion spawns from the necropolis gate in the far north of lavaland. It is the guardian of the Necropolis and emerges from within whenever an intruder tries to enter through its gate.
+ *Whenever Legion emerges, everything in lavaland will receive a notice via color, audio, and text. This is because Legion is powerful enough to slaughter the entirety of lavaland with little effort. LOL
+ *
+ *It has three attacks.
+ *Spawn Skull. Most of the time it will use this attack. Spawns a single legion skull.
+ *Spawn Sentinel. The legion will spawn up to three sentinels, depending on its size.
+ *CHARGE! The legion starts spinning and tries to melee the player. It will try to flick itself towards the player, dealing some damage if it hits.
+ *
+ *When Legion dies, it will split into three smaller skulls up to three times.
+ *If you kill all of the smaller ones it drops a staff of storms, which allows its wielder to call and disperse ash storms at will and functions as a powerful melee weapon.
+ *
+ *Difficulty: Medium
+ *
+ *SHITCODE AHEAD. BE ADVISED. Also comment extravaganza
+ */
 /mob/living/simple_animal/hostile/megafauna/legion
 	name = "Legion"
 	health = 700
@@ -43,7 +43,9 @@
 	crusher_achievement_type = /datum/award/achievement/boss/legion_crusher
 	score_achievement_type = /datum/award/score/legion_score
 	pixel_y = -16
+	base_pixel_y = -16
 	pixel_x = -32
+	base_pixel_x = -32
 	loot = list(/obj/item/stack/sheet/bone = 3)
 	vision_range = 13
 	wander = FALSE
@@ -239,7 +241,7 @@
 	return TRUE
 
 ///Sets the variables for new legion skulls. Usually called after splitting.
-/mob/living/simple_animal/hostile/megafauna/legion/proc/setVarsAfterSplit(var/mob/living/simple_animal/hostile/megafauna/legion/L)
+/mob/living/simple_animal/hostile/megafauna/legion/proc/setVarsAfterSplit(mob/living/simple_animal/hostile/megafauna/legion/L)
 	maxHealth = L.maxHealth
 	updatehealth()
 	size = L.size
@@ -279,12 +281,13 @@
 	if(!user_area || !user_turf || (user_area.type in excluded_areas))
 		to_chat(user, "<span class='warning'>Something is preventing you from using the staff here.</span>")
 		return
+	var/datum/weather_controller/weather_controller = SSmapping.get_map_zone_weather_controller(user_turf)
 	var/datum/weather/A
-	for(var/V in SSweather.processing)
-		var/datum/weather/W = V
-		if((user_turf.z in W.impacted_z_levels) && W.area_type == user_area.type)
-			A = W
-			break
+	if(weather_controller.current_weathers)
+		for(var/datum/weather/W as anything in weather_controller.current_weathers)
+			if(W.my_controller.mapzone.is_in_bounds(user_turf) && W.area_type == user_area.type)
+				A = W
+				break
 
 	if(A)
 		if(A.stage != END_STAGE)

@@ -1,3 +1,4 @@
+
 /obj/effect/mine
 	name = "dummy mine"
 	desc = "Better stay away from that thing."
@@ -7,18 +8,25 @@
 	icon_state = "uglymine"
 	var/triggered = 0
 
+/obj/effect/mine/Initialize()
+	. = ..()
+	var/static/list/loc_connections = list(
+		COMSIG_ATOM_ENTERED = .proc/on_entered,
+	)
+	AddElement(/datum/element/connect_loc, loc_connections)
+
 /obj/effect/mine/proc/mineEffect(mob/victim)
 	to_chat(victim, "<span class='danger'>*click*</span>")
 
-/obj/effect/mine/Crossed(AM as mob|obj)
-	. = ..()
+/obj/effect/mine/proc/on_entered(datum/source, atom/movable/AM)
+	SIGNAL_HANDLER
 	if(isturf(loc))
 		if(ismob(AM))
 			var/mob/MM = AM
 			if(!(MM.movement_type & FLYING))
-				triggermine(AM)
+				INVOKE_ASYNC(src, .proc/triggermine, AM)
 		else
-			triggermine(AM)
+			INVOKE_ASYNC(src, .proc/triggermine, AM)
 
 /obj/effect/mine/proc/triggermine(mob/victim)
 	if(triggered)
@@ -54,6 +62,15 @@
 
 /obj/effect/mine/shrapnel/mineEffect(mob/victim)
 	AddComponent(/datum/component/pellet_cloud, projectile_type=shrapnel_type, magnitude=shrapnel_magnitude)
+
+/obj/effect/mine/shrapnel/human_only
+	name = "sophisticated shrapnel mine"
+	desc = "A deadly mine, this one seems to be modified to trigger for humans only?"
+
+/obj/effect/mine/shrapnel/human_only/on_entered(datum/source, atom/movable/AM)
+	if(!ishuman(AM))
+		return
+	. = ..()
 
 /obj/effect/mine/shrapnel/sting
 	name = "stinger mine"
@@ -109,16 +126,18 @@
 	sound = 'sound/effects/adminhelp.ogg'
 
 /obj/effect/mine/pickup
-	name = "pickup"
-	desc = "pick me up"
-	icon = 'icons/effects/effects.dmi'
-	icon_state = "electricity2"
+	name = "He"
+	desc = "He."
+	icon = 'icons/obj/marg.dmi'
+	icon_state = "marg"
 	density = FALSE
 	var/duration = 0
+	pixel_x = -8
+	pixel_y = 1
 
 /obj/effect/mine/pickup/Initialize()
 	. = ..()
-	animate(src, pixel_y = 4, time = 20, loop = -1)
+	animate(src, time = 20, loop = -1)
 
 /obj/effect/mine/pickup/triggermine(mob/victim)
 	if(triggered)
@@ -130,8 +149,8 @@
 
 
 /obj/effect/mine/pickup/bloodbath
-	name = "Red Orb"
-	desc = "You feel angry just looking at it."
+	name = "His Odium"
+	desc = "Embrace my righteous fury."
 	duration = 1200 //2min
 	color = "#FF0000"
 	var/mob/living/doomslayer
@@ -145,7 +164,7 @@
 	INVOKE_ASYNC(src, .proc/blood_delusion, victim)
 
 	chainsaw = new(victim.loc)
-	victim.log_message("entered a blood frenzy", LOG_ATTACK)
+	victim.log_message("entered a marg frenzy", LOG_ATTACK)
 
 	ADD_TRAIT(chainsaw, TRAIT_NODROP, CHAINSAW_FRENZY_TRAIT)
 	victim.drop_all_held_items()
@@ -171,9 +190,9 @@
 	new /datum/hallucination/delusion(victim, TRUE, "demon", duration, 0)
 
 /obj/effect/mine/pickup/healing
-	name = "Blue Orb"
-	desc = "You feel better just looking at it."
-	color = "#0000FF"
+	name = "His Benevolence"
+	desc = "Come, come. Your wounds shall be undone by my mercy."
+
 
 /obj/effect/mine/pickup/healing/mineEffect(mob/living/carbon/victim)
 	if(!victim.client || !istype(victim))
@@ -182,9 +201,8 @@
 	victim.revive(full_heal = TRUE, admin_revive = TRUE)
 
 /obj/effect/mine/pickup/speed
-	name = "Yellow Orb"
-	desc = "You feel faster just looking at it."
-	color = "#FFFF00"
+	name = "His Purpose"
+	desc = "Come, let me quicken you to brilliance."
 	duration = 300
 
 /obj/effect/mine/pickup/speed/mineEffect(mob/living/carbon/victim)
@@ -192,6 +210,8 @@
 		return
 	to_chat(victim, "<span class='notice'>You feel fast!</span>")
 	victim.add_movespeed_modifier(/datum/movespeed_modifier/yellow_orb)
-	sleep(duration)
+	addtimer(CALLBACK(src, .proc/finish_effect, victim), duration)
+
+/obj/effect/mine/pickup/speed/proc/finish_effect(mob/living/carbon/victim)
 	victim.remove_movespeed_modifier(/datum/movespeed_modifier/yellow_orb)
 	to_chat(victim, "<span class='notice'>You slow down.</span>")

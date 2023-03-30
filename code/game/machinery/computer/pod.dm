@@ -33,8 +33,8 @@
 		alarm()
 
 /**
-  * Initiates launching sequence by checking if all components are functional, opening poddoors, firing mass drivers and then closing poddoors
-  */
+ * Initiates launching sequence by checking if all components are functional, opening poddoors, firing mass drivers and then closing poddoors
+ */
 /obj/machinery/computer/pod/proc/alarm()
 	if(machine_stat & (NOPOWER|BROKEN))
 		return
@@ -136,7 +136,7 @@
 /obj/machinery/computer/pod/old
 	name = "\improper DoorMex control console"
 	icon_state = "oldcomp"
-	icon_screen = "library"
+	icon_screen = "oldcomp_generic"
 	icon_keyboard = null
 
 /obj/machinery/computer/pod/old/syndicate

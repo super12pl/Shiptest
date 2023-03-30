@@ -438,7 +438,7 @@
 		else
 			user.visible_message("<span class='warning'>[user] puts [target] onto the photocopier!</span>", "<span class='notice'>You put [target] onto the photocopier.</span>")
 
-		target.loc = get_turf(src)
+		target.forceMove(get_turf(src))
 		ass = target
 
 		if(photo_copy)
@@ -506,6 +506,7 @@
 	name = "toner cartridge"
 	icon = 'icons/obj/device.dmi'
 	icon_state = "tonercartridge"
+	grind_results = list(/datum/reagent/iodine = 40)
 	var/charges = 5
 	var/max_charges = 5
 

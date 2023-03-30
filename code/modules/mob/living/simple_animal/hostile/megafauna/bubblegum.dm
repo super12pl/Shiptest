@@ -19,9 +19,9 @@ It can charge at its target, and also heavily damaging anything directly hit in 
 If at half health it will start to charge from all sides with clones.
 
 When Bubblegum dies, it leaves behind a H.E.C.K. mining suit as well as a chest that can contain three things:
- 1. A bottle that, when activated, drives everyone nearby into a frenzy
- 2. A contract that marks for death the chosen target
- 3. A spellblade that can slice off limbs at range
+1. A bottle that, when activated, drives everyone nearby into a frenzy
+2. A contract that marks for death the chosen target
+3. A spellblade that can slice off limbs at range
 
 Difficulty: Hard
 
@@ -54,6 +54,7 @@ Difficulty: Hard
 	melee_queue_distance = 20 // as far as possible really, need this because of blood warp
 	ranged = TRUE
 	pixel_x = -32
+	base_pixel_x = -32
 	del_on_death = TRUE
 	crusher_loot = list(/obj/structure/closet/crate/necropolis/bubblegum/crusher)
 	loot = list(/obj/structure/closet/crate/necropolis/bubblegum)
@@ -246,7 +247,7 @@ Difficulty: Hard
 			to_chat(L, "<span class='userdanger'>[src] rends you!</span>")
 			playsound(T, attack_sound, 100, TRUE, -1)
 			var/limb_to_hit = L.get_bodypart(pick(BODY_ZONE_HEAD, BODY_ZONE_CHEST, BODY_ZONE_R_ARM, BODY_ZONE_L_ARM, BODY_ZONE_R_LEG, BODY_ZONE_L_LEG))
-			L.apply_damage(10, BRUTE, limb_to_hit, L.run_armor_check(limb_to_hit, "melee", null, null, armour_penetration))
+			L.apply_damage(10, BRUTE, limb_to_hit, L.run_armor_check(limb_to_hit, "melee", armour_penetration, silent = TRUE))
 	SLEEP_CHECK_DEATH(3)
 
 /mob/living/simple_animal/hostile/megafauna/bubblegum/proc/bloodgrab(turf/T, handedness)
@@ -329,17 +330,16 @@ Difficulty: Hard
 	enrage_till = world.time + enrage_time
 	update_approach()
 	change_move_delay(3.75)
-	var/newcolor = rgb(149, 10, 10)
-	add_atom_colour(newcolor, TEMPORARY_COLOUR_PRIORITY)
+	add_atom_colour(COLOR_BUBBLEGUM_RED, TEMPORARY_COLOUR_PRIORITY)
 	var/datum/callback/cb = CALLBACK(src, .proc/blood_enrage_end)
 	addtimer(cb, enrage_time)
 
-/mob/living/simple_animal/hostile/megafauna/bubblegum/proc/blood_enrage_end(var/newcolor = rgb(149, 10, 10))
+/mob/living/simple_animal/hostile/megafauna/bubblegum/proc/blood_enrage_end()
 	update_approach()
 	change_move_delay()
-	remove_atom_colour(TEMPORARY_COLOUR_PRIORITY, newcolor)
+	remove_atom_colour(TEMPORARY_COLOUR_PRIORITY, COLOR_BUBBLEGUM_RED)
 
-/mob/living/simple_animal/hostile/megafauna/bubblegum/proc/change_move_delay(var/newmove = initial(move_to_delay))
+/mob/living/simple_animal/hostile/megafauna/bubblegum/proc/change_move_delay(newmove = initial(move_to_delay))
 	move_to_delay = newmove
 	set_varspeed(move_to_delay)
 	handle_automated_action() // need to recheck movement otherwise move_to_delay won't update until the next checking aka will be wrong speed for a bit
@@ -514,7 +514,7 @@ Difficulty: Hard
 	true_spawn = FALSE
 
 /mob/living/simple_animal/hostile/megafauna/bubblegum/hallucination/Initialize()
-	..()
+	. = ..()
 	toggle_ai(AI_OFF)
 
 /mob/living/simple_animal/hostile/megafauna/bubblegum/hallucination/charge(atom/chargeat = target, delay = 3, chargepast = 2)

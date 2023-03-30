@@ -1,7 +1,7 @@
 /obj/item/screwdriver
 	name = "screwdriver"
 	desc = "You can be totally screwy with this."
-	icon = 'whitesands/icons/obj/tools.dmi' //WS Edit - Better Tool Sprites
+	icon = 'icons/obj/tools.dmi'
 	icon_state = "screwdriver_map"
 	item_state = "screwdriver"
 	lefthand_file = 'icons/mob/inhands/equipment/tools_lefthand.dmi'
@@ -65,13 +65,13 @@
 
 /obj/item/screwdriver/get_belt_overlay()
 	if(random_color)
-		var/mutable_appearance/body = mutable_appearance('whitesands/icons/obj/clothing/belt_overlays.dmi', "screwdriver")
-		var/mutable_appearance/head = mutable_appearance('whitesands/icons/obj/clothing/belt_overlays.dmi', "screwdriver_head")
+		var/mutable_appearance/body = mutable_appearance('icons/obj/clothing/belt_overlays.dmi', "screwdriver")
+		var/mutable_appearance/head = mutable_appearance('icons/obj/clothing/belt_overlays.dmi', "screwdriver_head")
 		body.color = color
 		head.add_overlay(body)
 		return head
 	else
-		return mutable_appearance('whitesands/icons/obj/clothing/belt_overlays.dmi', icon_state)
+		return mutable_appearance('icons/obj/clothing/belt_overlays.dmi', icon_state)
 
 /obj/item/screwdriver/abductor
 	name = "alien screwdriver"
@@ -84,7 +84,7 @@
 	random_color = FALSE
 
 /obj/item/screwdriver/abductor/get_belt_overlay()
-	return mutable_appearance('whitesands/icons/obj/clothing/belt_overlays.dmi', "screwdriver_nuke")
+	return mutable_appearance('icons/obj/clothing/belt_overlays.dmi', "screwdriver_nuke")
 
 /obj/item/screwdriver/power
 	name = "hand drill"
@@ -135,3 +135,8 @@
 	usesound = 'sound/items/drill_use.ogg'
 	toolspeed = 0.5
 	random_color = FALSE
+
+/obj/item/screwdriver/old
+	desc = "You can be totally screwy with this. Well, if the end wasn't so rusty."
+	icon = 'icons/obj/tools.dmi'
+	icon_state = "oldscrewdriver"

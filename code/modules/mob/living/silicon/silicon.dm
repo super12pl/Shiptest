@@ -13,7 +13,7 @@
 	mob_biotypes = MOB_ROBOTIC
 	deathsound = 'sound/voice/borg_deathsound.ogg'
 	speech_span = SPAN_ROBOT
-	flags_1 = PREVENT_CONTENTS_EXPLOSION_1 | HEAR_1 | RAD_PROTECT_CONTENTS_1 | RAD_NO_CONTAMINATE_1
+	flags_1 = PREVENT_CONTENTS_EXPLOSION_1 | RAD_PROTECT_CONTENTS_1 | RAD_NO_CONTAMINATE_1
 	examine_cursor_icon = null
 	var/datum/ai_laws/laws = null//Now... THEY ALL CAN ALL HAVE LAWS
 	var/last_lawchange_announce = 0
@@ -46,6 +46,8 @@
 	var/hack_software = FALSE //Will be able to use hacking actions
 	var/interaction_range = 7			//wireless control range
 	var/obj/item/pda/ai/aiPDA
+
+	var/list/ship_access = list() // Internal access to ships
 
 /mob/living/silicon/Initialize()
 	. = ..()
@@ -446,5 +448,15 @@
 /mob/living/silicon/on_standing_up()
 	return // Silicons are always standing by default.
 
-/mob/living/silicon/get_bank_account() /// WS Edit - Silicons can buy and use materials
-	return SSeconomy.get_dep_account(ACCOUNT_CIV)
+// Silicon equivalent of ID card ship access procs
+/mob/living/silicon/proc/add_ship_access(datum/overmap/ship/controlled/ship)
+	if (ship)
+		ship_access += ship
+
+/mob/living/silicon/proc/remove_ship_access(datum/overmap/ship/controlled/ship)
+	if (ship)
+		ship_access -= ship
+
+/mob/living/silicon/proc/has_ship_access(datum/overmap/ship/controlled/ship)
+	if (ship)
+		return ship_access.Find(ship)

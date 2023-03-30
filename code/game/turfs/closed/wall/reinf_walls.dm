@@ -39,21 +39,29 @@
 		if(SHEATH)
 			return "<span class='notice'>The support rods have been <i>sliced through</i>, and the outer sheath is <b>connected loosely</b> to the girder.</span>"
 
-/turf/closed/wall/r_wall/devastate_wall()
-	new sheet_type(src, sheet_amount)
-	new /obj/item/stack/sheet/metal(src, 2)
-
 /turf/closed/wall/r_wall/attack_animal(mob/living/simple_animal/M)
 	M.changeNext_move(CLICK_CD_MELEE)
 	M.do_attack_animation(src)
 	if(!M.environment_smash)
 		return
 	if(M.environment_smash & ENVIRONMENT_SMASH_RWALLS)
-		dismantle_wall(1)
+		dismantle_wall(devastated = TRUE)
 		playsound(src, 'sound/effects/meteorimpact.ogg', 100, TRUE)
 	else
 		playsound(src, 'sound/effects/bang.ogg', 50, TRUE)
 		to_chat(M, "<span class='warning'>This wall is far too strong for you to destroy.</span>")
+
+/turf/closed/wall/r_wall/try_destroy(obj/item/I, mob/user, turf/T)
+	if(istype(I, /obj/item/pickaxe/drill/jackhammer))
+		to_chat(user, "<span class='notice'>You begin to smash though [src]...</span>")
+		if(do_after(user, 75, target = src))
+			if(!istype(src, /turf/closed/wall/r_wall))
+				return TRUE
+			I.play_tool_sound(src)
+			visible_message("<span class='warning'>[user] smashes through [src] with [I]!</span>", "<span class='italics'>You hear the grinding of metal.</span>")
+			dismantle_wall()
+			return TRUE
+	return FALSE
 
 /turf/closed/wall/r_wall/try_decon(obj/item/W, mob/user, turf/T)
 	//DECONSTRUCTION

@@ -152,6 +152,7 @@ DEFINE_BITFIELD(smoothing_junction, list(
 //do not use, use QUEUE_SMOOTH(atom)
 /atom/proc/smooth_icon()
 	smoothing_flags &= ~SMOOTH_QUEUED
+	flags_1 |= HTML_USE_INITAL_ICON_1
 	if (!z)
 		CRASH("[type] called smooth_icon() without being on a z-level")
 	if(smoothing_flags & SMOOTH_CORNERS)
@@ -309,10 +310,10 @@ DEFINE_BITFIELD(smoothing_junction, list(
 
 
 /**
-  * Basic smoothing proc. The atom checks for adjacent directions to smooth with and changes the icon_state based on that.
-  *
-  * Returns the previous smoothing_junction state so the previous state can be compared with the new one after the proc ends, and see the changes, if any.
-  *
+ * Basic smoothing proc. The atom checks for adjacent directions to smooth with and changes the icon_state based on that.
+ *
+ * Returns the previous smoothing_junction state so the previous state can be compared with the new one after the proc ends, and see the changes, if any.
+ *
 */
 /atom/proc/bitmask_smooth()
 	var/new_junction = NONE
@@ -367,9 +368,13 @@ DEFINE_BITFIELD(smoothing_junction, list(
 					var/junction_dir = reverse_ndir(smoothing_junction)
 					var/turned_adjacency = REVERSE_DIR(junction_dir)
 					var/turf/neighbor_turf = get_step(src, turned_adjacency & (NORTH|SOUTH))
+					if(!neighbor_turf) //You can step out of map boundaries
+						return
 					var/mutable_appearance/underlay_appearance = mutable_appearance(layer = TURF_LAYER, plane = FLOOR_PLANE)
 					if(!neighbor_turf.get_smooth_underlay_icon(underlay_appearance, src, turned_adjacency))
 						neighbor_turf = get_step(src, turned_adjacency & (EAST|WEST))
+						if(!neighbor_turf) //You can step out of map boundaries
+							return
 						if(!neighbor_turf.get_smooth_underlay_icon(underlay_appearance, src, turned_adjacency))
 							neighbor_turf = get_step(src, turned_adjacency)
 							if(!neighbor_turf.get_smooth_underlay_icon(underlay_appearance, src, turned_adjacency))
@@ -386,7 +391,7 @@ DEFINE_BITFIELD(smoothing_junction, list(
 
 
 //Icon smoothing helpers
-/proc/smooth_zlevel(var/zlevel, now = FALSE)
+/proc/smooth_zlevel(zlevel, now = FALSE)
 	var/list/away_turfs = block(locate(1, 1, zlevel), locate(world.maxx, world.maxy, zlevel))
 	for(var/V in away_turfs)
 		var/turf/T = V

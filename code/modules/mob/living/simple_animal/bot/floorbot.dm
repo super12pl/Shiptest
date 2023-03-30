@@ -9,8 +9,7 @@
 	health = 25
 	maxHealth = 25
 
-	radio_key = /obj/item/encryptionkey/headset_eng
-	radio_channel = RADIO_CHANNEL_ENGINEERING
+	radio_key = /obj/item/encryptionkey
 	bot_type = FLOOR_BOT
 	model = "Floorbot"
 	bot_core = /obj/machinery/bot_core/floorbot
@@ -41,10 +40,21 @@
 	#define REPLACE_TILE 6
 	#define TILE_EMAG 7
 
+/mob/living/simple_animal/bot/floorbot/rockplanet
+	name = "\improper Abandoned Floorbot"
+	desc = "Many years of abandonment has made this bot into a floor destroying robot! They look so excited!"
+	toolbox = /obj/item/storage/toolbox/syndicate/empty
+	toolbox_color = "s"
+	emagged = 2
+	remote_disabled = 1
+	locked = TRUE
+	faction = list("mining", "silicon" , "turret")
+
 /mob/living/simple_animal/bot/floorbot/Initialize(mapload, new_toolbox_color)
 	. = ..()
 	ADD_TRAIT(src, TRAIT_SPACEWALK, INNATE_TRAIT)
-	toolbox_color = new_toolbox_color
+	if(new_toolbox_color)
+		toolbox_color = new_toolbox_color
 	update_icon()
 	var/datum/job/engineer/J = new/datum/job/engineer
 	access_card.access += J.get_access()
@@ -254,7 +264,7 @@
 				target = null
 				mode = BOT_IDLE
 				return
-		else if( !bot_move(target) )
+		else if(!bot_move(target))
 			target = null
 			mode = BOT_IDLE
 			return

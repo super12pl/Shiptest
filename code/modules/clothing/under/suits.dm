@@ -2,7 +2,6 @@
 	icon = 'icons/obj/clothing/under/suits.dmi'
 	mob_overlay_icon = 'icons/mob/clothing/under/suits.dmi'
 	can_adjust = FALSE
-	fitted = FEMALE_UNIFORM_TOP //die die die die die
 
 /obj/item/clothing/under/suit/white_on_white
 	name = "white suit"
@@ -16,7 +15,7 @@
 	icon_state = "white_suit_skirt"
 	item_state = "scratch"
 	body_parts_covered = CHEST|GROIN|ARMS
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/suit/sl
 	desc = "It's a very amish looking suit."
@@ -28,6 +27,11 @@
 	desc = "It's a very smart uniform with a special pocket for tip."
 	icon_state = "waiter"
 	item_state = "waiter"
+
+/obj/item/clothing/under/suit/waiter/syndicate
+	name = "syndicate waiter's outfit"
+	icon_state = "waiter_s"
+	item_state = "waiter_s"
 
 /obj/item/clothing/under/suit/blacktwopiece
 	name = "black two piece suit"
@@ -48,35 +52,35 @@
 	icon_state = "blacksuit_skirt"
 	item_state = "bar_suit"
 	alt_covers_chest = TRUE
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/suit/black_really
 	name = "executive suit"
-	desc = "A formal black suit and red tie, intended for the station's finest."
+	desc = "A formal black suit and red tie, intended for the sector's finest."
 	icon_state = "really_black_suit"
 	item_state = "really_black_suit"
 
 /obj/item/clothing/under/suit/black_really/skirt
 	name = "executive suitskirt"
-	desc = "A formal black suitskirt and red tie, intended for the station's finest."
+	desc = "A formal black suitskirt and red tie, intended for the galaxy's finest."
 	icon_state = "really_black_suit_skirt"
 	item_state = "really_black_suit_skirt"
 	body_parts_covered = CHEST|GROIN|ARMS
-	fitted = FEMALE_UNIFORM_TOP
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION
 
 /obj/item/clothing/under/suit/black/female
 	name = "executive suit"
-	desc = "A formal trouser suit for women, intended for the station's finest."
+	desc = "A formal trouser suit for women, intended for the galaxy's finest."
 	icon_state = "black_suit_fem"
 	item_state = "black_suit_fem"
 
 /obj/item/clothing/under/suit/green
 	name = "green suit"
 	desc = "A green suit and yellow necktie. Baller."
-	icon = 'icons/obj/clothing/under/captain.dmi'
+	icon = 'icons/obj/clothing/under/command.dmi'
 	icon_state = "green_suit"
 	item_state = "dg_suit"
-	mob_overlay_icon = 'icons/mob/clothing/under/captain.dmi'
+	mob_overlay_icon = 'icons/mob/clothing/under/command.dmi'
 
 /obj/item/clothing/under/suit/red
 	name = "red suit"
@@ -92,7 +96,7 @@
 
 /obj/item/clothing/under/suit/navy
 	name = "navy suit"
-	desc = "A navy suit and red tie, intended for the station's finest."
+	desc = "A navy suit and red tie, intended for the galaxy's finest."
 	icon_state = "navy_suit"
 	item_state = "navy_suit"
 
@@ -135,3 +139,22 @@
 	item_state = "henchmen"
 	body_parts_covered = CHEST|GROIN|LEGS|FEET|ARMS|HANDS|HEAD
 	flags_inv = HIDEGLOVES|HIDESHOES|HIDEEARS|HIDEEYES|HIDEHAIR
+
+/obj/item/clothing/under/suit/roumain
+	name = "saint-roumain's worksuit"
+	desc = "A simple, hard-wearing suit designed for the hardworking hunters of the Saint-Roumain Militia."
+	icon_state = "rouma_work"
+	item_state = "rouma_work"
+
+/obj/item/clothing/under/suit/dresssuit
+	name = "navy dress-suit"
+	desc = "A very strange piece of clothing. Mostly navy, but with a pink undershirt. Who would even wear this?"
+	icon_state = "nicole"
+	item_state = "nicole"
+
+/obj/item/clothing/under/suit/dresssuit/skirt
+	name = "navy dress-suitskirt"
+	icon_state = "nicole_skirt"
+	item_state = "nicole_skirt"
+	body_parts_covered = CHEST|GROIN|ARMS
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON

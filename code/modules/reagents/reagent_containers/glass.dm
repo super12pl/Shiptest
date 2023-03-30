@@ -30,6 +30,7 @@
 		if(isturf(target) && reagents.reagent_list.len && thrownby)
 			log_combat(thrownby, target, "splashed (thrown) [english_list(reagents.reagent_list)]")
 			message_admins("[ADMIN_LOOKUPFLW(thrownby)] splashed (thrown) [english_list(reagents.reagent_list)] on [target] at [ADMIN_VERBOSEJMP(target)].")
+			playsound(src, 'sound/items/glass_splash.ogg', 50, 1)
 		reagents.expose(M, TOUCH)
 		log_combat(user, M, "splashed", R)
 		reagents.clear_reagents()
@@ -70,6 +71,7 @@
 
 		var/trans = reagents.trans_to(target, amount_per_transfer_from_this, transfered_by = user)
 		to_chat(user, "<span class='notice'>You transfer [trans] unit\s of the solution to [target].</span>")
+		playsound(src, 'sound/items/glass_transfer.ogg', 50, 1)
 
 	else if(target.is_drainable()) //A dispenser. Transfer FROM it TO us.
 		if(!target.reagents.total_volume)
@@ -83,12 +85,16 @@
 		var/trans = target.reagents.trans_to(src, amount_per_transfer_from_this, transfered_by = user)
 		to_chat(user, "<span class='notice'>You fill [src] with [trans] unit\s of the contents of [target].</span>")
 
-	else if(reagents.total_volume)
-		if(user.a_intent == INTENT_HARM)
-			user.visible_message("<span class='danger'>[user] splashes the contents of [src] onto [target]!</span>", \
-								"<span class='notice'>You splash the contents of [src] onto [target].</span>")
-			reagents.expose(target, TOUCH)
-			reagents.clear_reagents()
+	else if(reagents.total_volume && is_drainable())
+		switch(user.a_intent)
+			if(INTENT_HELP)
+				attempt_pour(target, user)
+			if(INTENT_HARM)
+				user.visible_message("<span class='danger'>[user] splashes the contents of [src] onto [target]!</span>", \
+									"<span class='notice'>You splash the contents of [src] onto [target].</span>")
+				reagents.expose(target, TOUCH)
+				reagents.clear_reagents()
+				playsound(src, 'sound/items/glass_splash.ogg', 50, 1)
 
 /obj/item/reagent_containers/glass/attackby(obj/item/I, mob/user, params)
 	var/hotness = I.get_temperature()
@@ -119,6 +125,8 @@
 	fill_icon_thresholds = list(1, 40, 60, 80, 100)
 	can_have_cap = TRUE
 	cap_icon_state = "beaker_cap"
+	drop_sound = 'sound/items/handling/beaker_drop.ogg'
+	pickup_sound =  'sound/items/handling/beaker_pickup.ogg'
 	cap_on = TRUE
 
 /obj/item/reagent_containers/glass/beaker/get_part_rating()
@@ -273,7 +281,7 @@
 	. = ..()
 	reagents.flags = initial(reagent_flags)
 
-/obj/item/reagent_containers/glass/bucket/equip_to_best_slot(var/mob/M)
+/obj/item/reagent_containers/glass/bucket/equip_to_best_slot(mob/M)
 	if(reagents.total_volume) //If there is water in a bucket, don't quick equip it to the head
 		var/index = slot_equipment_priority.Find(ITEM_SLOT_HEAD)
 		slot_equipment_priority.Remove(ITEM_SLOT_HEAD)
@@ -329,8 +337,12 @@
 		to_chat(user, "<span class='notice'>You fill [src] with [trans] unit\s of the contents of [target].</span>")
 
 	else if(reagents.total_volume)
-		if(user.a_intent == INTENT_HARM)
-			user.visible_message("<span class='danger'>[user] splashes the contents of [src] onto [target]!</span>", \
-								"<span class='notice'>You splash the contents of [src] onto [target].</span>")
-			reagents.expose(target, TOUCH)
-			reagents.clear_reagents()
+		switch(user.a_intent)
+			if(INTENT_HELP)
+				attempt_pour(target, user)
+			if(INTENT_HARM)
+				user.visible_message("<span class='danger'>[user] splashes the contents of [src] onto [target]!</span>", \
+									"<span class='notice'>You splash the contents of [src] onto [target].</span>")
+				reagents.expose(target, TOUCH)
+				reagents.clear_reagents()
+				playsound(src, 'sound/items/glass_splash.ogg', 50, 1)

@@ -14,6 +14,13 @@
 		html = msg,
 		confidential = TRUE)
 
+/proc/message_debug(msg)
+	log_world("DEBUG: [msg]")
+	msg = "<span class=\"admindebug\"><span class=\"prefix\">DEBUG:</span> <span class=\"message linkify\">[msg]</span></span>"
+	to_chat(GLOB.admins,
+		type = MESSAGE_TYPE_DEBUG,
+		html = msg,
+		confidential = TRUE)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////Panels
 
@@ -54,33 +61,6 @@
 		body += "<br><br><b>Show related accounts by:</b> "
 		body += " <a href='?_src_=holder;[HrefToken()];showrelatedacc=cid;client=[REF(M.client)]'>CID</a>"
 		body += "<a href='?_src_=holder;[HrefToken()];showrelatedacc=ip;client=[REF(M.client)]'>IP</a> "
-		body += "<br><br><b>CentCom Galactic Ban DB: </b> "
-		if(CONFIG_GET(string/centcom_ban_db))
-			body += "<a href='?_src_=holder;[HrefToken()];centcomlookup=[M.client.ckey]'>Search</a>"
-		else
-			body += "<i>Disabled</i>"
-		var/rep = 0
-		rep += SSpersistence.antag_rep[M.ckey]
-		body += "<br><br><b>Antagonist reputation: [rep]"
-		body += "<br><a href='?_src_=holder;[HrefToken()];modantagrep=add;mob=[REF(M)]'>+</a> "
-		body += "<a href='?_src_=holder;[HrefToken()];modantagrep=subtract;mob=[REF(M)]'>-</a> "
-		body += "<a href='?_src_=holder;[HrefToken()];modantagrep=set;mob=[REF(M)]'>=</a> "
-		body += "<a href='?_src_=holder;[HrefToken()];modantagrep=zero;mob=[REF(M)]'>0</a>"
-		//WS Begin - Metacoins
-		var/metabalance = M.client.get_metabalance()
-		body += "<br><br><b>[CONFIG_GET(string/metacurrency_name)]s</b>: [metabalance] "
-		body += "<br><a href='?_src_=holder;[HrefToken()];modmetacoin=add;mob=[REF(M)]'>+</a> "
-		body += "<a href='?_src_=holder;[HrefToken()];modmetacoin=subtract;mob=[REF(M)]'>-</a> "
-		body += "<a href='?_src_=holder;[HrefToken()];modmetacoin=set;mob=[REF(M)]'>=</a> "
-		body += "<a href='?_src_=holder;[HrefToken()];modmetacoin=zero;mob=[REF(M)]'>0</a>"
-		//Antag Tokens
-		var/antag_tokens = M.client.get_antag_token_count()
-		body += "<br><br><b>Antag Tokens</b>: [antag_tokens]"
-		body += "<br><a href='?_src_=holder;[HrefToken()];modantagtokens=add;mob=[REF(M)]'>+</a> "
-		body += "<a href='?_src_=holder;[HrefToken()];modantagtokens=subtract;mob=[REF(M)]'>-</a> "
-		body += "<a href='?_src_=holder;[HrefToken()];modantagtokens=set;mob=[REF(M)]'>=</a> "
-		body += "<a href='?_src_=holder;[HrefToken()];modantagtokens=zero;mob=[REF(M)]'>0</a>"
-		//WS End
 		var/full_version = "Unknown"
 		if(M.client.byond_version)
 			full_version = "[M.client.byond_version].[M.client.byond_build ? M.client.byond_build : "xxx"]"
@@ -267,8 +247,8 @@
 			dat+="<BR><A href='?src=[REF(src)];[HrefToken()];ac_menu_censor_channel=1'>Mark Feed Channel with Nanotrasen D-Notice (disables and locks the channel).</A>"
 			dat+="<BR><HR><A href='?src=[REF(src)];[HrefToken()];ac_set_signature=1'>The newscaster recognises you as:<BR> <FONT COLOR='green'>[src.admin_signature]</FONT></A>"
 		if(1)
-			dat+= "Station Feed Channels<HR>"
-			if( !length(GLOB.news_network.network_channels) )
+			dat+= "Feed Channels<HR>"
+			if(!length(GLOB.news_network.network_channels))
 				dat+="<I>No active channels found...</I>"
 			else
 				for(var/datum/newscaster/feed_channel/CHANNEL in GLOB.news_network.network_channels)
@@ -321,7 +301,7 @@
 				dat+="<FONT COLOR='red'><B>ATTENTION: </B></FONT>This channel has been deemed as threatening to the welfare of the station, and marked with a Nanotrasen D-Notice.<BR>"
 				dat+="No further feed story additions are allowed while the D-Notice is in effect.</FONT><BR><BR>"
 			else
-				if( !length(src.admincaster_feed_channel.messages) )
+				if(!length(src.admincaster_feed_channel.messages))
 					dat+="<I>No feed messages found in channel...</I><BR>"
 				else
 					var/i = 0
@@ -365,7 +345,7 @@
 			dat+="<B>[src.admincaster_feed_channel.channel_name]: </B><FONT SIZE=1> created by: <FONT COLOR='maroon'>[src.admincaster_feed_channel.returnAuthor(-1)]</FONT> </FONT><BR>"
 			dat+="<FONT SIZE=2><A href='?src=[REF(src)];[HrefToken()];ac_censor_channel_author=[REF(src.admincaster_feed_channel)]'>[(src.admincaster_feed_channel.authorCensor) ? ("Undo Author censorship") : ("Censor channel Author")]</A></FONT><HR>"
 
-			if( !length(src.admincaster_feed_channel.messages) )
+			if(!length(src.admincaster_feed_channel.messages))
 				dat+="<I>No feed messages found in channel...</I><BR>"
 			else
 				for(var/datum/newscaster/feed_message/MESSAGE in src.admincaster_feed_channel.messages)
@@ -382,7 +362,7 @@
 				dat+="<FONT COLOR='red'><B>ATTENTION: </B></FONT>This channel has been deemed as threatening to the welfare of the station, and marked with a Nanotrasen D-Notice.<BR>"
 				dat+="No further feed story additions are allowed while the D-Notice is in effect.</FONT><BR><BR>"
 			else
-				if( !length(src.admincaster_feed_channel.messages) )
+				if(!length(src.admincaster_feed_channel.messages))
 					dat+="<I>No feed messages found in channel...</I><BR>"
 				else
 					for(var/datum/newscaster/feed_message/MESSAGE in src.admincaster_feed_channel.messages)
@@ -646,8 +626,8 @@
 	set category = "Server"
 	set desc="People can't enter"
 	set name="Toggle Entering"
-	GLOB.enter_allowed = !( GLOB.enter_allowed )
-	if (!( GLOB.enter_allowed ))
+	GLOB.enter_allowed = !(GLOB.enter_allowed)
+	if (!(GLOB.enter_allowed))
 		to_chat(world, "<B>New players may no longer enter the game.</B>", confidential = TRUE)
 	else
 		to_chat(world, "<B>New players may now enter the game.</B>", confidential = TRUE)
@@ -709,7 +689,7 @@
 /datum/admins/proc/unprison(mob/M in GLOB.mob_list)
 	set category = "Admin"
 	set name = "Unprison"
-	if (is_centcom_level(M.z))
+	if (is_centcom_level(M))
 		SSjob.SendToLateJoin(M)
 		message_admins("[key_name_admin(usr)] has unprisoned [key_name_admin(M)]")
 		log_admin("[key_name(usr)] has unprisoned [key_name(M)]")
@@ -806,7 +786,7 @@
 	target_mind.traitor_panel()
 	SSblackbox.record_feedback("tally", "admin_verb", 1, "Traitor Panel") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
-/datum/admins/proc/show_skill_panel(var/target)
+/datum/admins/proc/show_skill_panel(target)
 	set category = "Admin.Game"
 	set desc = "Edit mobs's experience and skill levels"
 	set name = "Show Skill Panel"
@@ -826,7 +806,7 @@
 	set category = "Debug"
 	set desc="Reduces view range when wearing welding helmets"
 	set name="Toggle tinted welding helmes"
-	GLOB.tinted_weldhelh = !( GLOB.tinted_weldhelh )
+	GLOB.tinted_weldhelh = !(GLOB.tinted_weldhelh)
 	if (GLOB.tinted_weldhelh)
 		to_chat(world, "<B>The tinted_weldhelh has been enabled!</B>", confidential = TRUE)
 	else

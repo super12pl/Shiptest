@@ -152,6 +152,7 @@
 
 /obj/machinery/computer/piratepad_control
 	name = "cargo hold control terminal"
+	icon_screen = "bounty"
 	var/status_report = "Ready for delivery."
 	var/obj/machinery/piratepad/pad
 	var/warmup_time = 100
@@ -322,15 +323,6 @@
 			return 3000
 		else
 			return 1000
-
-/datum/export/pirate/parrot
-	cost = 2000
-	unit_name = "alive parrot"
-	export_types = list(/mob/living/simple_animal/parrot)
-
-/datum/export/pirate/parrot/find_loot()
-	for(var/mob/living/simple_animal/parrot/P in GLOB.alive_mob_list)
-		return P
 
 /datum/export/pirate/cash
 	cost = 1

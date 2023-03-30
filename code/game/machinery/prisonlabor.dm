@@ -1,6 +1,6 @@
 /obj/machinery/plate_press
 	name = "license plate press"
-	desc = "You know, we're making a lot of license plates for a station with literally no cars in it."
+	desc = "You know, we're making a lot of license plates for a space-faring civilization."
 	icon = 'icons/obj/machines/prison.dmi'
 	icon_state = "offline"
 	use_power = IDLE_POWER_USE
@@ -11,7 +11,7 @@
 
 /obj/machinery/plate_press/update_icon()
 	. = ..()
-	if(!is_operational())
+	if(!is_operational)
 		icon_state = "offline"
 	else if(pressing)
 		icon_state = "loop"
@@ -25,7 +25,7 @@
 	. = ..()
 
 /obj/machinery/plate_press/attackby(obj/item/I, mob/living/user, params)
-	if(!is_operational())
+	if(!is_operational)
 		to_chat(user, "<span class='warning'>[src] has to be on to do this!</span>")
 		return FALSE
 	if(pressing)

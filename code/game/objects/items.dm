@@ -1,5 +1,7 @@
 GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/effects/fire.dmi', "fire"))
 
+GLOBAL_DATUM_INIT(welding_sparks, /mutable_appearance, mutable_appearance('icons/effects/welding_effect.dmi', "welding_sparks", GASFIRE_LAYER, ABOVE_LIGHTING_PLANE))
+
 GLOBAL_VAR_INIT(rpg_loot_items, FALSE)
 // if true, everyone item when created will have its name changed to be
 // more... RPG-like.
@@ -17,6 +19,13 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 	var/lefthand_file = 'icons/mob/inhands/items_lefthand.dmi'
 	///Icon file for right inhand overlays
 	var/righthand_file = 'icons/mob/inhands/items_righthand.dmi'
+
+	var/supports_variations = null //This is a bitfield that defines what variations exist for bodyparts like Digi legs.
+
+	/// Needs to follow this syntax: either a list() with the x and y coordinates of the pixel you want to get the colour from, or a hexcolour. Colour one replaces red, two replaces blue, and three replaces green in the icon state.
+	var/list/greyscale_colors[3]
+	/// Needs to be a RGB-greyscale format icon state in all species' clothing icon files.
+	var/greyscale_icon_state
 
 	///Icon file for mob worn overlays.
 	var/icon/mob_overlay_icon
@@ -87,6 +96,9 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 	///flags for what should be done when you click on the item, default is picking it up
 	var/interaction_flags_item = INTERACT_ITEM_ATTACK_HAND_PICKUP
 
+	/// Used in picking icon_states based on the string color here. Also used for cables or something. This could probably do with being deprecated.
+	var/item_color = null
+
 	///What body parts are covered by the clothing when you wear it
 	var/body_parts_covered = 0
 	///Literally does nothing right now
@@ -110,10 +122,12 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 	///How long it takes to resist out of the item (cuffs and such)
 	var/breakouttime = 0
 
-	///Used in [atom/proc/attackby] to say how something was attacked "[x] has been [z.attack_verb] by [y] with [z]"
+	/// Used in attackby() to say how something was attacked "[x] has been [z.attack_verb] by [y] with [z]"
 	var/list/attack_verb
-	///list() of species types, if a species cannot put items in a certain slot, but species type is in list, it will be able to wear that item
+	/// list() of species types, if a species cannot put items in a certain slot, but species type is in list, it will be able to wear that item
 	var/list/species_exception = null
+	///A bitfield of bodytypes that the item cannot be worn by.
+	var/restricted_bodytypes = null
 
 	///Who threw the item
 	var/mob/thrownby = null
@@ -171,7 +185,6 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 	var/outline_filter
 
 	var/canMouseDown = FALSE
-
 
 /obj/item/Initialize()
 
@@ -237,11 +250,11 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 		AddComponent(/datum/component/butchering, 80 * toolspeed)
 
 /**Makes cool stuff happen when you suicide with an item
-  *
-  *Outputs a creative message and then return the damagetype done
-  * Arguments:
-  * * user: The mob that is suiciding
-  */
+ *
+ *Outputs a creative message and then return the damagetype done
+ * Arguments:
+ * * user: The mob that is suiciding
+ */
 /obj/item/proc/suicide_act(mob/user)
 	return
 
@@ -259,8 +272,8 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 			return
 
 	var/turf/T = loc
-	loc = null
-	loc = T
+	abstract_move(null)
+	forceMove(T)
 
 /obj/item/examine(mob/user) //This might be spammy. Remove?
 	. = ..()
@@ -350,7 +363,7 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 		else
 			to_chat(user, "<span class='warning'>You burn your hand on [src]!</span>")
 			var/obj/item/bodypart/affecting = C.get_bodypart("[(user.active_hand_index % 2 == 0) ? "r" : "l" ]_arm")
-			if(affecting && affecting.receive_damage( 0, 5 ))		// 5 burn damage
+			if(affecting && affecting.receive_damage(0, 5))		// 5 burn damage
 				C.update_damage_overlays()
 			return
 
@@ -360,7 +373,7 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 			if(!C.gloves || (!(C.gloves.resistance_flags & (UNACIDABLE|ACID_PROOF))))
 				to_chat(user, "<span class='warning'>The acid on [src] burns your hand!</span>")
 				var/obj/item/bodypart/affecting = C.get_bodypart("[(user.active_hand_index % 2 == 0) ? "r" : "l" ]_arm")
-				if(affecting && affecting.receive_damage( 0, 5 ))		// 5 burn damage
+				if(affecting && affecting.receive_damage(0, 5))		// 5 burn damage
 					C.update_damage_overlays()
 
 	if(!(interaction_flags_item & INTERACT_ITEM_ATTACK_HAND_PICKUP))		//See if we're supposed to auto pickup.
@@ -473,16 +486,28 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 /obj/item/proc/on_found(mob/finder)
 	return
 
-/**
-  *called after an item is placed in an equipment slot
 
-  * Arguments:
-  * * user is mob that equipped it
-  * * slot uses the slot_X defines found in setup.dm for items that can be placed in multiple slots
-  * * Initial is used to indicate whether or not this is the initial equipment (job datums etc) or just a player doing it
-  */
+/**
+ * To be overwritten to only perform visual tasks;
+ * this is directly called instead of `equipped` on visual-only features like human dummies equipping outfits.
+ *
+ * This separation exists to prevent things like the monkey sentience helmet from
+ * polling ghosts while it's just being equipped as a visual preview for a dummy.
+ */
+/obj/item/proc/visual_equipped(mob/user, slot, initial = FALSE)
+	return
+
+/**
+ *called after an item is placed in an equipment slot
+
+ * Arguments:
+ * * user is mob that equipped it
+ * * slot uses the slot_X defines found in setup.dm for items that can be placed in multiple slots
+ * * Initial is used to indicate whether or not this is the initial equipment (job datums etc) or just a player doing it
+ */
 /obj/item/proc/equipped(mob/user, slot, initial = FALSE)
 	SHOULD_CALL_PARENT(1)
+	visual_equipped(user, slot, initial)
 	SEND_SIGNAL(src, COMSIG_ITEM_EQUIPPED, user, slot)
 	for(var/X in actions)
 		var/datum/action/A = X
@@ -503,15 +528,15 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 	return TRUE
 
 /**
-  *the mob M is attempting to equip this item into the slot passed through as 'slot'. Return 1 if it can do this and 0 if it can't.
-  *if this is being done by a mob other than M, it will include the mob equipper, who is trying to equip the item to mob M. equipper will be null otherwise.
-  *If you are making custom procs but would like to retain partial or complete functionality of this one, include a 'return ..()' to where you want this to happen.
-  * Arguments:
-  * * disable_warning to TRUE if you wish it to not give you text outputs.
-  * * slot is the slot we are trying to equip to
-  * * equipper is the mob trying to equip the item
-  * * bypass_equip_delay_self for whether we want to bypass the equip delay
-  */
+ *the mob M is attempting to equip this item into the slot passed through as 'slot'. Return 1 if it can do this and 0 if it can't.
+ *if this is being done by a mob other than M, it will include the mob equipper, who is trying to equip the item to mob M. equipper will be null otherwise.
+ *If you are making custom procs but would like to retain partial or complete functionality of this one, include a 'return ..()' to where you want this to happen.
+ * Arguments:
+ * * disable_warning to TRUE if you wish it to not give you text outputs.
+ * * slot is the slot we are trying to equip to
+ * * equipper is the mob trying to equip the item
+ * * bypass_equip_delay_self for whether we want to bypass the equip delay
+ */
 /obj/item/proc/mob_can_equip(mob/living/M, mob/living/equipper, slot, disable_warning = FALSE, bypass_equip_delay_self = FALSE, swap = FALSE)
 	if(!M)
 		return FALSE
@@ -535,15 +560,15 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 		usr.UnarmedAttack(src)
 
 /**
-  *This proc is executed when someone clicks the on-screen UI button.
-  *The default action is attack_self().
-  *Checks before we get to here are: mob is alive, mob is not restrained, stunned, asleep, resting, laying, item is on the mob.
-  */
+ *This proc is executed when someone clicks the on-screen UI button.
+ *The default action is attack_self().
+ *Checks before we get to here are: mob is alive, mob is not restrained, stunned, asleep, resting, laying, item is on the mob.
+ */
 /obj/item/proc/ui_action_click(mob/user, actiontype)
 	attack_self(user)
 
 ///This proc determines if and at what an object will reflect energy projectiles if it's in l_hand,r_hand or wear_suit
-/obj/item/proc/IsReflect(var/def_zone)
+/obj/item/proc/IsReflect(def_zone)
 	return FALSE
 
 /obj/item/proc/eyestab(mob/living/carbon/M, mob/living/carbon/user)
@@ -673,7 +698,7 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 	return FALSE
 
 /obj/item/proc/get_belt_overlay() //Returns the icon used for overlaying the object on a belt
-	return mutable_appearance('whitesands/icons/obj/clothing/belt_overlays.dmi', icon_state)
+	return mutable_appearance('icons/obj/clothing/belt_overlays.dmi', icon_state)
 
 /obj/item/proc/update_slot_icon()
 	if(!ismob(loc))
@@ -995,14 +1020,14 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 	return src
 
 /**
-  * tryEmbed() is for when you want to try embedding something without dealing with the damage + hit messages of calling hitby() on the item while targetting the target.
-  *
-  * Really, this is used mostly with projectiles with shrapnel payloads, from [/datum/element/embed/proc/checkEmbedProjectile], and called on said shrapnel. Mostly acts as an intermediate between different embed elements.
-  *
-  * Arguments:
-  * * target- Either a body part, a carbon, or a closed turf. What are we hitting?
-  * * forced- Do we want this to go through 100%?
-  */
+ * tryEmbed() is for when you want to try embedding something without dealing with the damage + hit messages of calling hitby() on the item while targetting the target.
+ *
+ * Really, this is used mostly with projectiles with shrapnel payloads, from [/datum/element/embed/proc/checkEmbedProjectile], and called on said shrapnel. Mostly acts as an intermediate between different embed elements.
+ *
+ * Arguments:
+ * * target- Either a body part, a carbon, or a closed turf. What are we hitting?
+ * * forced- Do we want this to go through 100%?
+ */
 /obj/item/proc/tryEmbed(atom/target, forced=FALSE, silent=FALSE)
 	if(!isbodypart(target) && !iscarbon(target) && !isclosedturf(target))
 		return
@@ -1045,3 +1070,28 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 	if(ismob(loc))
 		var/mob/mob_loc = loc
 		mob_loc.regenerate_icons()
+
+/**
+ * * An interrupt for offering an item to other people, called mainly from [/mob/living/carbon/proc/give], in case you want to run your own offer behavior instead.
+ *
+ * * Return TRUE if you want to interrupt the offer.
+ *
+ * * Arguments:
+ * * offerer - the person offering the item
+ */
+/obj/item/proc/on_offered(mob/living/carbon/offerer)
+	if(SEND_SIGNAL(src, COMSIG_ITEM_OFFERING, offerer) & COMPONENT_OFFER_INTERRUPT)
+		return TRUE
+
+/**
+ * * An interrupt for someone trying to accept an offered item, called mainly from [/mob/living/carbon/proc/take], in case you want to run your own take behavior instead.
+ *
+ * * Return TRUE if you want to interrupt the taking.
+ *
+ * * Arguments:
+ * * offerer - the person offering the item
+ * * taker - the person trying to accept the offer
+ */
+/obj/item/proc/on_offer_taken(mob/living/carbon/offerer, mob/living/carbon/taker)
+	if(SEND_SIGNAL(src, COMSIG_ITEM_OFFER_TAKEN, offerer, taker) & COMPONENT_OFFER_INTERRUPT)
+		return TRUE

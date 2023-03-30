@@ -63,7 +63,7 @@
 
 /datum/outfit/spacepol
 	name = "Spacepol Officer"
-	uniform = /obj/item/clothing/under/rank/security/officer/spacepol
+	uniform = /obj/item/clothing/under/rank/security/officer/beatcop
 	suit = /obj/item/clothing/suit/armor/vest/blueshirt
 	belt = /obj/item/gun/ballistic/automatic/pistol/m1911
 	head = /obj/item/clothing/head/helmet/police
@@ -85,12 +85,13 @@
 	W.update_label()
 
 /datum/outfit/russiancorpse/hunter
+	name = "Frontiersman Corpse (Hunter)"
 	ears = /obj/item/radio/headset
 	r_hand = /obj/item/gun/ballistic/rifle/boltaction
 
 /datum/outfit/russiancorpse/hunter/pre_equip(mob/living/carbon/human/H)
 	if(prob(50))
-		head = /obj/item/clothing/head/ushanka
+		head = /obj/item/clothing/head/trapper
 
 /datum/outfit/bountyarmor
 	name = "Bounty Hunter - Armored"
@@ -155,15 +156,3 @@
 	backpack_contents = list(
 		/obj/item/bountytrap = 4
 		)
-
-/datum/outfit/bountysynth/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)
-	if(visualsOnly)
-		return
-	var/datum/species/synth/synthetic_appearance = new()
-	H.set_species(synthetic_appearance)
-	synthetic_appearance.assume_disguise(synthetic_appearance, H)
-	H.update_hair()
-	var/obj/item/card/id/W = H.wear_id
-	W.assignment = "Bounty Hunter"
-	W.registered_name = H.real_name
-	W.update_label()

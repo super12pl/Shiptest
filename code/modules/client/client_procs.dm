@@ -280,11 +280,11 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 			if(!I || I == src)
 				continue
 			var/client/C = I
-			if(C.key && (C.key != key) )
+			if(C.key && (C.key != key))
 				var/matches
-				if( (C.address == address) )
+				if((C.address == address))
 					matches += "IP ([address])"
-				if( (C.computer_id == computer_id) )
+				if((C.computer_id == computer_id))
 					if(matches)
 						matches += " and "
 					matches += "ID ([computer_id])"
@@ -301,9 +301,11 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 		reconnecting = TRUE
 		player_details = GLOB.player_details[ckey]
 		player_details.byond_version = full_version
+		player_details.last_known_ip = address
 	else
 		player_details = new(ckey)
 		player_details.byond_version = full_version
+		player_details.last_known_ip = address
 		GLOB.player_details[ckey] = player_details
 
 
@@ -386,13 +388,15 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 			qdel(src)
 			return 0
 
-	if( (world.address == address || !address) && !GLOB.host )
+	if((world.address == address || !address) && !GLOB.host)
 		GLOB.host = key
 		world.update_status()
 
 	if(holder)
 		add_admin_verbs()
-		to_chat(src, get_message_output("memo"))
+		var/memo_message = get_message_output("memo")
+		if(memo_message)
+			to_chat(src, memo_message)
 		adminGreet()
 
 	if(mentor && !holder) //WS Edit - Mentors
@@ -444,9 +448,13 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 
 	if(CONFIG_GET(flag/autoconvert_notes))
 		convert_notes_sql(ckey)
-	to_chat(src, get_message_output("message", ckey))
+	var/user_messages = get_message_output("message", ckey)
+	if(user_messages)
+		to_chat(src, user_messages)
 	if(!winexists(src, "asset_cache_browser")) // The client is using a custom skin, tell them.
 		to_chat(src, "<span class='warning'>Unable to access asset cache browser, if you are using a custom skin file, please allow DS to download the updated version, if you are not, then make a bug report. This is not a critical issue but can cause issues with resource downloading, as it is impossible to know when extra resources arrived to you.</span>")
+
+	update_ambience_pref()
 
 
 	//This is down here because of the browse() calls in tooltip/New()
@@ -503,14 +511,16 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 				"Someone come hold me :(",\
 				"I need someone on me :(",\
 				"What happened? Where has everyone gone?",\
-				"Forever alone :("\
+				"Forever alone :(",\
+				"All Alone On A Late Night :^(",\
+				"Love me, feed me, don't leave me :("\
 			)
 
 			send2tgs("Server", "[cheesy_message] (No admins online)")
 	QDEL_LIST_ASSOC_VAL(char_render_holders)
 	if(movingmob != null)
-		movingmob.client_mobs_in_contents -= mob
-		UNSETEMPTY(movingmob.client_mobs_in_contents)
+		LAZYREMOVE(movingmob.client_mobs_in_contents, mob)
+	SSambience.ambience_listening_clients -= src
 	seen_messages = null
 	Master.UpdateTickRate()
 	. = ..() //Even though we're going to be hard deleted there are still some things that want to know the destroy is happening
@@ -559,7 +569,7 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 		return
 
 	//If we aren't an admin, and the flag is set
-	if(CONFIG_GET(flag/panic_bunker) && !holder && !GLOB.deadmins[ckey])
+	if(CONFIG_GET(flag/panic_bunker) && !holder && !GLOB.deadmins[ckey] && !(ckey in GLOB.bunker_passthrough))
 		var/living_recs = CONFIG_GET(number/panic_bunker_living)
 		//Relies on pref existing, but this proc is only called after that occurs, so we're fine.
 		var/minutes = get_exp_living(pure_numeric = TRUE)
@@ -596,6 +606,8 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 		if(!account_join_date)
 			account_join_date = "Error"
 			account_age = -1
+		else if(ckey in GLOB.bunker_passthrough)
+			GLOB.bunker_passthrough -= ckey
 	qdel(query_client_in_db)
 	var/datum/DBQuery/query_get_client_age = SSdbcore.NewQuery(
 		"SELECT firstseen, DATEDIFF(Now(),firstseen), accountjoindate, DATEDIFF(Now(),accountjoindate) FROM [format_table_name("player")] WHERE ckey = :ckey",
@@ -820,14 +832,19 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 		ip_intel = res.intel
 
 /client/Click(atom/object, atom/location, control, params)
+	if(click_intercept_time)
+		if(click_intercept_time >= world.time)
+			click_intercept_time = 0 //Reset and return. Next click should work, but not this one.
+			return
+		click_intercept_time = 0 //Just reset. Let's not keep re-checking forever.
 	var/ab = FALSE
-	var/list/L = params2list(params)
+	var/list/modifiers = params2list(params)
 
-	var/dragged = L["drag"]
-	if(dragged && !L[dragged])
+	var/dragged = LAZYACCESS(modifiers, DRAG)
+	if(dragged && !LAZYACCESS(modifiers, dragged)) //I don't know what's going on here, but I don't trust it
 		return
 
-	if (object && object == middragatom && L["left"])
+	if (object && object == middragatom && LAZYACCESS(modifiers, LEFT_CLICK))
 		ab = max(0, 5 SECONDS-(world.time-middragtime)*0.1)
 
 	var/mcl = CONFIG_GET(number/minute_click_limit)
@@ -873,9 +890,6 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 		// so that the visual focus indicator matches reality.
 		winset(src, null, "input.background-color=[COLOR_INPUT_DISABLED]")
 
-	else
-		winset(src, null, "input.focus=true input.background-color=[COLOR_INPUT_ENABLED]")
-
 	..()
 
 /client/proc/add_verbs_from_config()
@@ -902,7 +916,7 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 #if (PRELOAD_RSC == 0)
 	var/static/next_external_rsc = 0
 	var/list/external_rsc_urls = CONFIG_GET(keyed_list/external_rsc_urls)
-	if(length(external_rsc_urls.len))
+	if(length(external_rsc_urls))
 		next_external_rsc = WRAP(next_external_rsc+1, 1, external_rsc_urls.len+1)
 		preload_rsc = external_rsc_urls[next_external_rsc]
 #endif
@@ -946,14 +960,14 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 	view_size.setTo(clamp(change, min, max), clamp(change, min, max))
 
 /**
-  * Updates the keybinds for special keys
-  *
-  * Handles adding macros for the keys that need it
-  * And adding movement keys to the clients movement_keys list
-  * At the time of writing this, communication(OOC, Say, IC) require macros
-  * Arguments:
-  * * direct_prefs - the preference we're going to get keybinds from
-  */
+ * Updates the keybinds for special keys
+ *
+ * Handles adding macros for the keys that need it
+ * And adding movement keys to the clients movement_keys list
+ * At the time of writing this, communication(OOC, Say, IC) require macros
+ * Arguments:
+ * * direct_prefs - the preference we're going to get keybinds from
+ */
 /client/proc/update_special_keybinds(datum/preferences/direct_prefs)
 	var/datum/preferences/D = prefs || direct_prefs
 	if(!D?.key_bindings)
@@ -978,6 +992,8 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 					winset(src, "default-[REF(key)]", "parent=default;name=[key];command=looc")
 				if("Me")
 					winset(src, "default-[REF(key)]", "parent=default;name=[key];command=me")
+				if("Whisper")
+					winset(src, "default-[REF(key)]", "parent=default;name=[key];command=whisper")
 
 /client/proc/change_view(new_size)
 	if (isnull(new_size))
@@ -1060,8 +1076,8 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 	to_chat(src, "<span class='userdanger'>Statpanel failed to load, click <a href='?src=[REF(src)];reload_statbrowser=1'>here</a> to reload the panel </span>")
 
 /**
-  * Initializes dropdown menus on client
-  */
+ * Initializes dropdown menus on client
+ */
 /client/proc/initialize_menus()
 	var/list/topmenus = GLOB.menulist[/datum/verbs/menu]
 	for (var/thing in topmenus)
@@ -1088,3 +1104,11 @@ GLOBAL_LIST_INIT(blacklisted_builds, list(
 	if(holder)
 		holder.filteriffic = new /datum/filter_editor(in_atom)
 		holder.filteriffic.ui_interact(mob)
+
+/client/proc/update_ambience_pref()
+	if(prefs.toggles & SOUND_AMBIENCE)
+		if(SSambience.ambience_listening_clients[src] > world.time)
+			return // If already properly set we don't want to reset the timer.
+		SSambience.ambience_listening_clients[src] = world.time + 10 SECONDS //Just wait 10 seconds before the next one aight mate? cheers.
+	else
+		SSambience.ambience_listening_clients -= src

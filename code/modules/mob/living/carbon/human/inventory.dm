@@ -171,7 +171,7 @@
 
 	//Item is handled and in slot, valid to call callback, for this proc should always be true
 	if(!not_handled)
-		I.equipped(src, slot, initial)
+		has_equipped(I, slot, initial)
 
 	return not_handled //For future deeper overrides
 
@@ -299,7 +299,14 @@
 	if(!O)
 		return 0
 
-	return O.equip(src, visualsOnly, preference_source)
+	if (O.equip(src, visualsOnly, preference_source)) // Need the mob equipped to access its ID
+		var/datum/overmap/ship/controlled/ship = SSshuttle.get_ship(src)
+		if (ship)
+			var/obj/item/card/id/idcard = get_idcard(TRUE)
+			if (idcard)
+				idcard.add_ship_access(ship)
+
+		return TRUE
 
 
 //delete all equipment without dropping anything

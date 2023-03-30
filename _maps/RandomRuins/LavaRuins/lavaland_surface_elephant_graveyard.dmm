@@ -83,7 +83,6 @@
 /area/lavaland/surface)
 "av" = (
 /obj/structure/barricade/wooden/crude,
-/obj/structure/barricade/wooden,
 /obj/effect/decal/cleanable/blood/splatter,
 /turf/open/floor/plating/asteroid/basalt/wasteland,
 /area/ruin/unpowered/elephant_graveyard)
@@ -246,7 +245,7 @@
 /turf/open/floor/mineral/titanium/white,
 /area/ruin/powered/graveyard_shuttle)
 "bi" = (
-/obj/effect/turf_decal/delivery/white,
+/obj/effect/turf_decal/industrial/hatch,
 /turf/open/floor/circuit/off,
 /area/ruin/powered/graveyard_shuttle)
 "bj" = (
@@ -436,7 +435,7 @@
 /obj/effect/decal/cleanable/glass,
 /obj/effect/decal/cleanable/dirt/dust,
 /obj/machinery/door/airlock/shuttle{
-	name = "archaeology shuttle airlock"
+	name = "Archaeology Shuttle Airlock"
 	},
 /turf/open/floor/mineral/titanium/purple,
 /area/ruin/powered/graveyard_shuttle)
@@ -444,7 +443,7 @@
 /obj/effect/decal/remains/human,
 /obj/effect/decal/cleanable/dirt/dust,
 /obj/item/clothing/head/fedora/curator,
-/obj/item/clothing/suit/curator,
+/obj/item/clothing/suit/armor/curator,
 /turf/open/floor/mineral/titanium/white,
 /area/ruin/powered/graveyard_shuttle)
 "bY" = (
@@ -566,7 +565,7 @@
 /area/ruin/unpowered/elephant_graveyard)
 "cx" = (
 /obj/item/light/bulb/broken,
-/obj/effect/turf_decal/caution/stand_clear/white,
+/obj/effect/turf_decal/industrial/stand_clear/white,
 /obj/effect/decal/cleanable/dirt/dust,
 /turf/open/floor/mineral/titanium/purple,
 /area/ruin/powered/graveyard_shuttle)

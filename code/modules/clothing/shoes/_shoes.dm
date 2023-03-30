@@ -7,12 +7,13 @@
 
 	body_parts_covered = FEET
 	slot_flags = ITEM_SLOT_FEET
-	greyscale_colors = list(list(13, 3))
+	greyscale_colors = list(list(13, 3), list(14, 2), list(12, 2))
 	greyscale_icon_state = "shoes"
 
 	permeability_coefficient = 0.5
 	slowdown = SHOES_SLOWDOWN
 	strip_delay = 1 SECONDS
+
 	var/blood_state = BLOOD_STATE_NOT_BLOODY
 	var/list/bloody_shoes = list(BLOOD_STATE_HUMAN = 0,BLOOD_STATE_XENO = 0, BLOOD_STATE_OIL = 0, BLOOD_STATE_NOT_BLOODY = 0)
 	var/offset = 0
@@ -69,24 +70,20 @@
 	else if(tied == SHOES_KNOTTED)
 		. += "The shoelaces are all knotted together."
 
-/obj/item/clothing/shoes/equipped(mob/user, slot)
-	. = ..()
+/obj/item/clothing/shoes/visual_equipped(mob/user, slot)
+	..()
 	if(offset && (slot_flags & slot))
 		user.pixel_y += offset
 		worn_y_dimension -= (offset * 2)
 		user.update_inv_shoes()
 		equipped_before_drop = TRUE
+
+/obj/item/clothing/shoes/equipped(mob/user, slot)
+	. = ..()
 	if(can_be_tied && tied == SHOES_UNTIED)
 		our_alert = user.throw_alert("shoealert", /atom/movable/screen/alert/shoes/untied)
 		RegisterSignal(src, COMSIG_SHOES_STEP_ACTION, .proc/check_trip, override=TRUE)
 
-	if((DIGITIGRADE_SHOE & obj_flags) || (DIGITIGRADE_COMPATIBLE & obj_flags))	//WS start - Digitigrade magboots
-		var/mob/living/carbon/human/H = user
-		if(H.get_item_by_slot(ITEM_SLOT_FEET) && H.get_item_by_slot(ITEM_SLOT_ICLOTHING))
-			var/obj/item/clothing/under/S = H.get_item_by_slot(ITEM_SLOT_ICLOTHING)
-			if(("legs" in H.dna.species.mutant_bodyparts) && H.dna.features["legs"] == "Digitigrade Legs")
-				if((HIDEJUMPSUIT in S.flags_inv) || (LEGS & S.body_parts_covered))
-					digi_alt(H, 1)												//WS end - Digitigrade magboots
 
 /obj/item/clothing/shoes/proc/restore_offsets(mob/user)
 	equipped_before_drop = FALSE
@@ -98,14 +95,6 @@
 		user.clear_alert("shoealert")
 	if(offset && equipped_before_drop)
 		restore_offsets(user)
-
-	if((DIGITIGRADE_SHOE & obj_flags) || (DIGITIGRADE_COMPATIBLE & obj_flags))	//WS start - Digitigrade magboots
-		var/mob/living/carbon/human/H = user
-		if(H.get_item_by_slot(ITEM_SLOT_FEET) && H.get_item_by_slot(ITEM_SLOT_ICLOTHING))
-			var/obj/item/clothing/under/S = H.get_item_by_slot(ITEM_SLOT_ICLOTHING)
-			if(("legs" in H.dna.species.mutant_bodyparts) && H.dna.features["legs"] == "Digitigrade Legs")
-				if((HIDEJUMPSUIT in S.flags_inv) || (LEGS & S.body_parts_covered))
-					digi_alt(H, 0)												//WS end - Digitigrade magboots
 
 	. = ..()
 
@@ -130,15 +119,15 @@
 	return FALSE
 
 /**
-  * adjust_laces adjusts whether our shoes (assuming they can_be_tied) and tied, untied, or knotted
-  *
-  * In addition to setting the state, it will deal with getting rid of alerts if they exist, as well as registering and unregistering the stepping signals
-  *
-  * Arguments:
-  * *
-  * * state: SHOES_UNTIED, SHOES_TIED, or SHOES_KNOTTED, depending on what you want them to become
-  * * user: used to check to see if we're the ones unknotting our own laces
-  */
+ * adjust_laces adjusts whether our shoes (assuming they can_be_tied) and tied, untied, or knotted
+ *
+ * In addition to setting the state, it will deal with getting rid of alerts if they exist, as well as registering and unregistering the stepping signals
+ *
+ * Arguments:
+ * *
+ * * state: SHOES_UNTIED, SHOES_TIED, or SHOES_KNOTTED, depending on what you want them to become
+ * * user: used to check to see if we're the ones unknotting our own laces
+ */
 /obj/item/clothing/shoes/proc/adjust_laces(state, mob/user)
 	if(!can_be_tied)
 		return
@@ -158,14 +147,14 @@
 		RegisterSignal(src, COMSIG_SHOES_STEP_ACTION, .proc/check_trip, override=TRUE)
 
 /**
-  * handle_tying deals with all the actual tying/untying/knotting, inferring your intent from who you are in relation to the state of the laces
-  *
-  * If you're the wearer, you want them to move towards tied-ness (knotted -> untied -> tied). If you're not, you're pranking them, so you're moving towards knotted-ness (tied -> untied -> knotted)
-  *
-  * Arguments:
-  * *
-  * * user: who is the person interacting with the shoes?
-  */
+ * handle_tying deals with all the actual tying/untying/knotting, inferring your intent from who you are in relation to the state of the laces
+ *
+ * If you're the wearer, you want them to move towards tied-ness (knotted -> untied -> tied). If you're not, you're pranking them, so you're moving towards knotted-ness (tied -> untied -> knotted)
+ *
+ * Arguments:
+ * *
+ * * user: who is the person interacting with the shoes?
+ */
 /obj/item/clothing/shoes/proc/handle_tying(mob/user)
 	///our_guy here is the wearer, if one exists (and he must exist, or we don't care)
 	var/mob/living/carbon/human/our_guy = loc
@@ -261,7 +250,7 @@
 				to_chat(our_guy, "<span class='danger'>You stumble a bit on your untied shoelaces!</span>")
 				if(!our_guy.has_movespeed_modifier(/datum/movespeed_modifier/shove))
 					our_guy.add_movespeed_modifier(/datum/movespeed_modifier/shove)
-					addtimer(CALLBACK(our_guy, /mob/living/carbon/human/proc/clear_shove_slowdown), SHOVE_SLOWDOWN_LENGTH)
+					addtimer(CALLBACK(our_guy, /mob/living/carbon/proc/clear_shove_slowdown), SHOVE_SLOWDOWN_LENGTH)
 
 			if(26 to 1000)
 				wiser = FALSE

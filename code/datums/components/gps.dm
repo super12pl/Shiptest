@@ -36,10 +36,10 @@ GLOBAL_LIST_EMPTY(GPS_list)
 
 ///Called on COMSIG_ITEM_ATTACK_SELF
 /datum/component/gps/item/proc/interact(datum/source, mob/user)
-	SIGNAL_HANDLER_DOES_SLEEP
+	SIGNAL_HANDLER
 
 	if(user)
-		ui_interact(user)
+		INVOKE_ASYNC(src, .proc/ui_interact, user)
 
 ///Called on COMSIG_PARENT_EXAMINE
 /datum/component/gps/item/proc/on_examine(datum/source, mob/user, list/examine_list)
@@ -108,23 +108,32 @@ GLOBAL_LIST_EMPTY(GPS_list)
 		return data
 
 	var/turf/curr = get_turf(parent)
+	var/datum/virtual_level/vlevel = curr.get_virtual_level()
+	if(!vlevel) //You probably shouldn't be here...
+		return data
+	var/datum/map_zone/mapzone = vlevel.parent_map_zone
+	var/list/coords = vlevel.get_relative_coords(curr)
 	data["currentArea"] = "[get_area_name(curr, TRUE)]"
-	data["currentCoords"] = "[curr.x], [curr.y], [curr.get_virtual_z_level()]"
+	data["currentCoords"] = "[coords[1]], [coords[2]], [mapzone.id], [vlevel.relative_id]"
 
 	var/list/signals = list()
 	data["signals"] = list()
 
-	for(var/gps in GLOB.GPS_list)
-		var/datum/component/gps/G = gps
+	for(var/datum/component/gps/G as anything in GLOB.GPS_list)
 		if(G.emped || !G.tracking || G == src)
 			continue
 		var/turf/pos = get_turf(G.parent)
-		if(!pos || !global_mode && pos.get_virtual_z_level() != curr.get_virtual_z_level())
+		if(!pos || !global_mode && pos.virtual_z != curr.virtual_z)
 			continue
 		var/list/signal = list()
+		var/datum/virtual_level/other_vlevel = pos.get_virtual_level()
+		if(!other_vlevel)
+			continue
+		var/datum/map_zone/other_mapzone = other_vlevel.parent_map_zone
+		var/list/other_coords = other_vlevel.get_relative_coords(pos)
 		signal["entrytag"] = G.gpstag //Name or 'tag' of the GPS
-		signal["coords"] = "[pos.x], [pos.y], [pos.get_virtual_z_level()]"
-		if(pos.get_virtual_z_level() == curr.get_virtual_z_level()) //Distance/Direction calculations for same z-level only
+		signal["coords"] = "[other_coords[1]], [other_coords[2]], [other_mapzone.id], [other_vlevel.relative_id]"
+		if(other_vlevel == vlevel) //Distance/Direction calculations for same sub-zone only
 			signal["dist"] = max(get_dist(curr, pos), 0) //Distance between the src and remote GPS turfs
 			signal["degrees"] = round(Get_Angle(curr, pos)) //0-360 degree directional bearing, for more precision.
 		signals += list(signal) //Add this signal to the list of signals

@@ -72,7 +72,7 @@ SUBSYSTEM_DEF(explosions)
 #define SSEX_OBJ "obj"
 
 /datum/controller/subsystem/explosions/proc/is_exploding()
-	return (lowturf.len || medturf.len || highturf.len || flameturf.len || throwturf.len || lowobj.len || medobj.len || highobj.len)
+	return (length(lowturf) || length(medturf) || length(highturf) || length(flameturf) || length(throwturf) || length(lowobj) || length(medobj) || length(highobj))
 
 
 /client/proc/check_bomb_impacts()
@@ -195,7 +195,7 @@ SUBSYSTEM_DEF(explosions)
 	var/orig_max_distance = max(devastation_range, heavy_impact_range, light_impact_range, flash_range, flame_range)
 
 	//Zlevel specific bomb cap multiplier
-	var/cap_multiplier = SSmapping.level_trait(epicenter.z, ZTRAIT_BOMBCAP_MULTIPLIER)
+	var/cap_multiplier = epicenter.virtual_level_trait(ZTRAIT_BOMBCAP_MULTIPLIER)
 	if (isnull(cap_multiplier))
 		cap_multiplier = 1
 
@@ -214,7 +214,7 @@ SUBSYSTEM_DEF(explosions)
 
 	var/x0 = epicenter.x
 	var/y0 = epicenter.y
-	var/z0 = epicenter.get_virtual_z_level()
+	var/z0 = epicenter.virtual_z()
 	var/area/areatype = get_area(epicenter)
 	SSblackbox.record_feedback("associative", "explosion", 1, list("dev" = devastation_range, "heavy" = heavy_impact_range, "light" = light_impact_range, "flash" = flash_range, "flame" = flame_range, "orig_dev" = orig_dev_range, "orig_heavy" = orig_heavy_range, "orig_light" = orig_light_range, "x" = x0, "y" = y0, "z" = z0, "area" = areatype.type, "time" = time_stamp("YYYY-MM-DD hh:mm:ss", 1)))
 
@@ -235,7 +235,7 @@ SUBSYSTEM_DEF(explosions)
 		var/sound/creaking_explosion_sound = sound(get_sfx("explosion_creaking"))
 		var/sound/hull_creaking_sound = sound(get_sfx("hull_creaking"))
 		var/sound/explosion_echo_sound = sound('sound/effects/explosion_distant.ogg')
-		var/on_station = SSmapping.level_trait(epicenter.z, ZTRAIT_STATION)
+		var/on_station = epicenter.virtual_level_trait(ZTRAIT_STATION)
 		var/creaking_explosion = FALSE
 
 		if(prob(devastation_range*DEVASTATION_PROB+heavy_impact_range*HEAVY_IMPACT_PROB) && on_station) // Huge explosions are near guaranteed to make the station creak and whine, smaller ones might.
@@ -245,7 +245,7 @@ SUBSYSTEM_DEF(explosions)
 			var/mob/M = MN
 			// Double check for client
 			var/turf/M_turf = get_turf(M)
-			if(M_turf && M_turf.get_virtual_z_level() == z0)
+			if(M_turf && M_turf.virtual_z() == z0)
 				var/dist = get_dist(M_turf, epicenter)
 				var/baseshakeamount
 				if(orig_max_distance - dist > 0)
@@ -318,7 +318,7 @@ SUBSYSTEM_DEF(explosions)
 		var/flame_dist = dist < flame_range
 		var/throw_dist = dist
 
-		if(T.get_virtual_z_level() != z0)
+		if(T.virtual_z() != z0)
 			dist = EXPLODE_NONE
 		else if(dist < devastation_range)
 			dist = EXPLODE_DEVASTATE
@@ -335,6 +335,8 @@ SUBSYSTEM_DEF(explosions)
 				var/atom/A = I
 				if (length(A.contents) && !(A.flags_1 & PREVENT_CONTENTS_EXPLOSION_1)) //The atom/contents_explosion() proc returns null if the contents ex_acting has been handled by the atom, and TRUE if it hasn't.
 					items += A.GetAllContents()
+				if(istype(A, /mob/living))
+					items -= A				// Because GetAllContents returns the mob too, resulting in double damage
 			for(var/O in items)
 				var/atom/A = O
 				if(!QDELETED(A))
@@ -408,7 +410,7 @@ SUBSYSTEM_DEF(explosions)
 	var/c_dist = 1
 	L += t_center
 
-	while( c_dist <= dist )
+	while(c_dist <= dist)
 		y = t_center.y + c_dist
 		x = t_center.x - c_dist + 1
 		for(x in x to t_center.x+c_dist)
@@ -509,27 +511,24 @@ SUBSYSTEM_DEF(explosions)
 		timer = TICK_USAGE_REAL
 		var/list/high_obj = highobj
 		highobj = list()
-		for(var/thing in high_obj)
-			if(thing)
-				var/obj/O = thing
+		for(var/obj/O as anything in high_obj)
+			if(!QDELETED(O))
 				O.ex_act(EXPLODE_DEVASTATE)
 		cost_highobj = MC_AVERAGE(cost_highobj, TICK_DELTA_TO_MS(TICK_USAGE_REAL - timer))
 
 		timer = TICK_USAGE_REAL
 		var/list/med_obj = medobj
 		medobj = list()
-		for(var/thing in med_obj)
-			if(thing)
-				var/obj/O = thing
+		for(var/obj/O as anything in med_obj)
+			if(!QDELETED(O))
 				O.ex_act(EXPLODE_HEAVY)
 		cost_medobj = MC_AVERAGE(cost_medobj, TICK_DELTA_TO_MS(TICK_USAGE_REAL - timer))
 
 		timer = TICK_USAGE_REAL
 		var/list/low_obj = lowobj
 		lowobj = list()
-		for(var/thing in low_obj)
-			if(thing)
-				var/obj/O = thing
+		for(var/obj/O as anything in low_obj)
+			if(!QDELETED(O))
 				O.ex_act(EXPLODE_LIGHT)
 		cost_lowobj = MC_AVERAGE(cost_lowobj, TICK_DELTA_TO_MS(TICK_USAGE_REAL - timer))
 

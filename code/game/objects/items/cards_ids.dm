@@ -15,7 +15,7 @@
 /obj/item/card
 	name = "card"
 	desc = "Does card things."
-	icon = 'whitesands/icons/obj/card.dmi' //WS Edit - Actually good-looking IDs >:)
+	icon = 'icons/obj/card.dmi'
 	w_class = WEIGHT_CLASS_TINY
 
 	var/list/files = list()
@@ -69,6 +69,44 @@
 	righthand_file = 'icons/mob/inhands/equipment/idcards_righthand.dmi'
 	item_flags = NO_MAT_REDEMPTION | NOBLUDGEON
 	var/prox_check = TRUE //If the emag requires you to be in range
+	var/emag_on = TRUE //added to suppport multi-function tools with a deployable emag - hams
+	var/uses_left = -1 //how many uses does the emag have left before it's toast? If set to -1 then it never runs out
+
+//multi-purpose emag tool example- used in syndicate borgs.
+/obj/item/card/emag/borg
+	name = "/INFILTRATE/ module"
+	desc = "A cyborg subsystem of debatable legality, designed to defeat security systems and unlock backdoor functionality."
+	icon_state = "inf_emag"
+	icon = 'icons/obj/items_cyborg.dmi'
+
+/obj/item/card/emag/borg/examine()
+	. = ..()
+	. += "<span class='notice'> Capable of interchanging between electromagnetic, electrical, & screw turning functionality.</span>"
+	if(uses_left > -1)
+		. += "<span class='notice'> It has [uses_left] charge\s left.</span>"
+
+/obj/item/card/emag/limited
+	name = "limited cryptographic sequencer"
+	desc = "It's a card with a magnetic strip attached to some circuitry. It has limited charges."
+	uses_left = 1
+
+/obj/item/card/emag/borg/attack_self(mob/user)
+	playsound(get_turf(user), 'sound/items/change_drill.ogg', 50, TRUE)
+	if(tool_behaviour == NONE)
+		tool_behaviour = TOOL_SCREWDRIVER
+		to_chat(user, "<span class='notice'>You extend the screwdriver within the [src].</span>")
+		icon_state = "inf_screwdriver"
+		emag_on = FALSE
+	else if(tool_behaviour == TOOL_SCREWDRIVER)
+		tool_behaviour = TOOL_MULTITOOL
+		to_chat(user, "<span class='notice'>You prime the multitool attachment of the [src].</span>")
+		icon_state = "inf_multi"
+		emag_on = FALSE
+	else
+		tool_behaviour = NONE
+		to_chat(user, "<span class='notice'>You enable the electromagnetic hacking system of the [src].</span>")
+		icon_state = "inf_emag"
+		emag_on = TRUE
 
 /obj/item/card/emag/bluespace
 	name = "bluespace cryptographic sequencer"
@@ -77,15 +115,21 @@
 	prox_check = FALSE
 
 /obj/item/card/emag/attack()
-	return
+	if(emag_on == TRUE)
+		return
 
 /obj/item/card/emag/afterattack(atom/target, mob/user, proximity)
 	. = ..()
-	var/atom/A = target
-	if(!proximity && prox_check)
-		return
-	log_combat(user, A, "attempted to emag")
-	A.emag_act(user)
+	if(emag_on == TRUE)
+		var/atom/A = target
+		if(!proximity && prox_check)
+			return
+		log_combat(user, A, "attempted to emag")
+		A.emag_act(user)
+		if(!(uses_left == -1))
+			uses_left--
+			if(uses_left == 0)
+				emag_on = FALSE
 
 /obj/item/card/emagfake
 	desc = "It's a card with a magnetic strip attached to some circuitry. Closer inspection shows that this card is a poorly made replica, with a \"DonkCo\" logo stamped on the back."
@@ -109,9 +153,9 @@
 	slot_flags = ITEM_SLOT_ID
 	armor = list("melee" = 0, "bullet" = 0, "laser" = 0, "energy" = 0, "bomb" = 0, "bio" = 0, "rad" = 0, "fire" = 100, "acid" = 100)
 	resistance_flags = FIRE_PROOF | ACID_PROOF
-	var/id_type_name = "identification card"
 	var/mining_points = 0 //For redeeming at mining equipment vendors
 	var/list/access = list()
+	var/list/ship_access = list()
 	var/registered_name = null // The name registered_name on the card
 	var/assignment = null
 	var/access_txt // mapping aid
@@ -120,11 +164,13 @@
 	var/uses_overlays = TRUE
 	var/icon/cached_flat_icon
 	var/registered_age = 13 // default age for ss13 players
+	var/job_icon
 
 /obj/item/card/id/Initialize(mapload)
 	. = ..()
 	if(mapload && access_txt)
 		access = text2access(access_txt)
+	update_label()
 	RegisterSignal(src, COMSIG_ATOM_UPDATED_ICON, .proc/update_in_wallet)
 
 /obj/item/card/id/Destroy()
@@ -299,12 +345,13 @@
 		msg += "The card indicates that the holder is [registered_age] years old. [(registered_age < AGE_MINOR) ? "There's a holographic stripe that reads <b><span class='danger'>'MINOR: DO NOT SERVE ALCOHOL OR TOBACCO'</span></b> along the bottom of the card." : ""]"
 	if(mining_points)
 		msg += "There's [mining_points] mining equipment redemption point\s loaded onto this card."
+	if(length(ship_access))
+		var/list/ship_names = list()
+		for(var/datum/overmap/ship/controlled/ship in ship_access)
+			ship_names += ship.name
+		msg += "The card has access to the following ships: [ship_names.Join(", ")]"
 	if(registered_account)
 		msg += "The account linked to the ID belongs to '[registered_account.account_holder]' and reports a balance of [registered_account.account_balance] cr."
-		if(registered_account.account_job)
-			var/datum/bank_account/D = SSeconomy.get_dep_account(registered_account.account_job.paycheck_department)
-			if(D)
-				msg += "The [D.account_holder] reports a balance of [D.account_balance] cr."
 		msg += "<span class='info'>Alt-Click the ID to pull money from the linked account in the form of holochips.</span>"
 		msg += "<span class='info'>You can insert credits into the linked account by pressing holochips, cash, or coins against the ID.</span>"
 		if(registered_account.account_holder == user.real_name)
@@ -328,11 +375,10 @@
 	if(!uses_overlays)
 		return
 	cached_flat_icon = null
-	var/job = assignment ? ckey(GetJobName()) : null
 	if(registered_name && registered_name != "Captain")
 		. += mutable_appearance(icon, "assigned")
-	if(job)
-		. += mutable_appearance(icon, "id[job]")
+	if(job_icon)
+		. += mutable_appearance(icon, "id[job_icon]")
 
 /obj/item/card/id/proc/update_in_wallet()
 	SIGNAL_HANDLER
@@ -354,6 +400,21 @@
 		return "[icon2html(get_cached_flat_icon(), user)] [thats? "That's ":""][get_examine_name(user)]" //displays all overlays in chat
 	return ..()
 
+// Adds the referenced ship directly to the card
+/obj/item/card/id/proc/add_ship_access(datum/overmap/ship/controlled/ship)
+	if (ship)
+		ship_access += ship
+
+// Removes the referenced ship from the card
+/obj/item/card/id/proc/remove_ship_access(datum/overmap/ship/controlled/ship)
+	if (ship)
+		ship_access -= ship
+
+// Finds the referenced ship in the list
+/obj/item/card/id/proc/has_ship_access(datum/overmap/ship/controlled/ship)
+	if (ship)
+		return ship_access.Find(ship)
+
 /*
 Usage:
 update_label()
@@ -362,12 +423,11 @@ update_label()
 
 /obj/item/card/id/proc/update_label()
 	var/blank = !registered_name
-	name = "[blank ? id_type_name : "[registered_name]'s ID Card"][(!assignment) ? "" : " ([assignment])"]"
+	name = "[blank ? initial(name) : "[registered_name]'s ID Card"][(!assignment) ? "" : " ([assignment])"]"
 	update_icon()
 
 /obj/item/card/id/silver
 	name = "silver identification card"
-	id_type_name = "silver identification card"
 	desc = "A silver card which shows honour and dedication."
 	icon_state = "silver"
 	item_state = "silver_id"
@@ -380,14 +440,12 @@ update_label()
 	access = list(ACCESS_CHANGE_IDS)
 
 /obj/item/card/id/silver/reaper
-	name = "Thirteen's ID Card (Reaper)"
 	access = list(ACCESS_MAINT_TUNNELS)
 	assignment = "Reaper"
 	registered_name = "Thirteen"
 
 /obj/item/card/id/gold
 	name = "gold identification card"
-	id_type_name = "gold identification card"
 	desc = "A golden card which shows power and might."
 	icon_state = "gold"
 	item_state = "gold_id"
@@ -490,7 +548,6 @@ update_label()
 
 /obj/item/card/id/syndicate_command
 	name = "syndicate ID card"
-	id_type_name = "syndicate ID card"
 	desc = "An ID straight from the Syndicate."
 	registered_name = "Syndicate"
 	assignment = "Syndicate Overlord"
@@ -500,48 +557,21 @@ update_label()
 	registered_age = null
 
 /obj/item/card/id/syndicate_command/crew_id
-	name = "syndicate ID card"
-	id_type_name = "syndicate ID card"
-	desc = "An ID straight from the Syndicate."
-	registered_name = "Syndicate"
-	assignment = "Syndicate Operative"
-	icon_state = "syndie"
+	assignment = "Operative"
 	access = list(ACCESS_SYNDICATE, ACCESS_ROBOTICS)
 	uses_overlays = FALSE
 
-/obj/item/card/id/syndicate_command/captain_id
-	name = "syndicate captain ID card"
-	id_type_name = "syndicate captain ID card"
-	desc = "An ID straight from the Syndicate."
-	registered_name = "Syndicate"
-	assignment = "Syndicate Ship Captain"
-	icon_state = "syndie"
-	access = list(ACCESS_SYNDICATE, ACCESS_ROBOTICS)
-	uses_overlays = FALSE
-
-/obj/item/card/id/syndicate_command/crew_id
-	name = "syndicate ID card"
-	id_type_name = "syndicate ID card"
-	desc = "An ID straight from the Syndicate."
-	registered_name = "Syndicate"
-	assignment = "Syndicate Operative"
-	icon_state = "syndie"
-	access = list(ACCESS_SYNDICATE)
+/obj/item/card/id/syndicate_command/operative
+	assignment = "Operative"
+	access = list(ACCESS_SYNDICATE, ACCESS_ROBOTICS, ACCESS_ARMORY)
 	uses_overlays = FALSE
 
 /obj/item/card/id/syndicate_command/captain_id
-	name = "syndicate captain ID card"
-	id_type_name = "syndicate captain ID card"
-	desc = "An ID straight from the Syndicate."
-	registered_name = "Syndicate"
-	assignment = "Syndicate Ship Captain"
-	icon_state = "syndie"
-	access = list(ACCESS_SYNDICATE)
+	assignment = "Captain"
+	access = list(ACCESS_SYNDICATE, ACCESS_ROBOTICS, ACCESS_ARMORY, ACCESS_SYNDICATE_LEADER)
 	uses_overlays = FALSE
 
 /obj/item/card/id/captains_spare
-	name = "captain's spare ID"
-	id_type_name = "captain's spare ID"
 	desc = "The spare ID of the High Lord himself."
 	icon_state = "gold"
 	item_state = "gold_id"
@@ -554,19 +584,19 @@ update_label()
 /obj/item/card/id/captains_spare/Initialize()
 	var/datum/job/captain/J = new/datum/job/captain
 	access = J.get_access()
+	add_ship_access(SSshuttle.get_ship(src))
 	. = ..()
 	update_label()
 
 /obj/item/card/id/captains_spare/update_label() //so it doesn't change to Captain's ID card (Captain) on a sneeze
 	if(registered_name == "Captain")
-		name = "[id_type_name][(!assignment || assignment == "Captain") ? "" : " ([assignment])"]"
+		name = "[initial(name)][(!assignment || assignment == "Captain") ? "" : " ([assignment])"]"
 		update_icon()
 	else
 		..()
 
 /obj/item/card/id/centcom
 	name = "\improper CentCom ID"
-	id_type_name = "\improper CentCom ID"
 	desc = "An ID straight from Central Command."
 	icon_state = "centcom"
 	registered_name = "Central Command"
@@ -578,9 +608,11 @@ update_label()
 	access = get_all_centcom_access()
 	. = ..()
 
+/obj/item/card/id/centcom/has_ship_access(datum/overmap/ship/controlled/ship)
+	return TRUE
+
 /obj/item/card/id/ert
 	name = "\improper CentCom ID"
-	id_type_name = "\improper CentCom ID"
 	desc = "An ERT ID card."
 	icon_state = "ert_commander"
 	registered_name = "Emergency Response Team Commander"
@@ -648,7 +680,6 @@ update_label()
 
 /obj/item/card/id/ert/deathsquad
 	name = "\improper Death Squad ID"
-	id_type_name = "\improper Death Squad ID"
 	desc = "A Death Squad ID card."
 	icon_state = "deathsquad" //NO NO SIR DEATH SQUADS ARENT A PART OF NANOTRASEN AT ALL
 	registered_name = "Death Commando"
@@ -669,7 +700,6 @@ update_label()
 
 /obj/item/card/id/prisoner
 	name = "prisoner ID card"
-	id_type_name = "prisoner ID card"
 	desc = "You are a number, you are not a free man."
 	icon_state = "orange"
 	item_state = "orange-id"
@@ -723,6 +753,7 @@ update_label()
 /obj/item/card/id/mining
 	name = "mining ID"
 	access = list(ACCESS_MINING, ACCESS_MINING_STATION, ACCESS_MECH_MINING, ACCESS_MAILSORTING, ACCESS_MINERAL_STOREROOM)
+	custom_price = 250
 
 /obj/item/card/id/away
 	name = "\proper a perfectly generic identification card"
@@ -768,6 +799,7 @@ update_label()
 	desc = "A faded Charlie Station ID card. You can make out the rank \"Captain\"."
 	assignment = "Charlie Station Captain"
 	access = list(ACCESS_AWAY_GENERAL, ACCESS_AWAY_ENGINE, ACCESS_AWAY_SEC)
+
 /obj/item/card/id/away/old/apc
 	name = "APC Access ID"
 	desc = "A special ID card that allows access to APC terminals."
@@ -775,6 +807,31 @@ update_label()
 
 /obj/item/card/id/away/deep_storage //deepstorage.dmm space ruin
 	name = "bunker access ID"
+
+/obj/item/card/id/solgov
+	name = "\improper SolGov ID"
+	desc = "A SolGov ID with no proper access to speak of."
+	assignment = "Officer"
+	icon_state = "solgov"
+	uses_overlays = FALSE
+
+/obj/item/card/id/solgov/commander
+	name = "\improper SolGov ID"
+	desc = "A SolGov ID with no proper access to speak of. This one indicates a Commander."
+	assignment = "Commander"
+
+/obj/item/card/id/solgov/elite
+	name = "\improper SolGov ID"
+	desc = "A SolGov ID with no proper access to speak of. This one indicates an Elite."
+	assignment = "Elite"
+
+/obj/item/card/id/away/slime //We're ranchin, baby! //It's slimin time
+	name = "\improper Slime Lab access card"
+	desc = "An ID card with access to the Slime Lab"
+	assignment = "Slime Research Staff"
+	access = list(ACCESS_AWAY_GENERAL, ACCESS_XENOBIOLOGY)
+	registered_name = "Slime Researcher"
+	icon_state = "id"
 
 /obj/item/card/id/departmental_budget
 	name = "departmental card (FUCK)"

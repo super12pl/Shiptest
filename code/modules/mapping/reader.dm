@@ -23,6 +23,9 @@
 	var/list/bounds
 	var/did_expand = FALSE
 
+	///any turf in this list is skipped inside of build_coordinate
+	var/list/turf_blacklist = list()
+
 	// raw strings used to represent regexes more accurately
 	// '' used to avoid confusing syntax highlighting
 	var/static/regex/dmmRegex = new(@'"([a-zA-Z]+)" = \(((?:.|\n)*?)\)\n(?!\t)|\((\d+),(\d+),(\d+)\) = \{"([a-zA-Z\n]*)"\}', "g")
@@ -311,6 +314,10 @@
 	//Instanciation
 	////////////////
 
+	for (var/turf_in_blacklist in turf_blacklist)
+		if (crds == turf_in_blacklist) //if the given turf is blacklisted, dont do anything with it
+			return
+
 	//The next part of the code assumes there's ALWAYS an /area AND a /turf on a given tile
 	//first instance the /area and remove it from the members list
 	index = members.len
@@ -367,12 +374,15 @@
 
 	if(crds)
 		if(ispath(path, /turf))
+			var/old_virtual_z = crds.virtual_z
 			if(placeOnTop)
 				. = crds.PlaceOnTop(null, path, CHANGETURF_DEFER_CHANGE | (no_changeturf ? CHANGETURF_SKIP : NONE))
 			else if(!no_changeturf)
 				. = crds.ChangeTurf(path, null, CHANGETURF_DEFER_CHANGE)
 			else
-				. = create_atom(path, crds)//first preloader pass
+				. = create_turf(path, crds , old_virtual_z)//first preloader pass
+			var/turf/new_turf = .
+			new_turf.virtual_z = old_virtual_z //UNDER NO CIRCUMSTANCES LOOSE THIS VARIABLE
 		else
 			. = create_atom(path, crds)//first preloader pass
 
@@ -384,6 +394,10 @@
 		SSatoms.map_loader_stop()
 		stoplag()
 		SSatoms.map_loader_begin()
+
+/datum/parsed_map/proc/create_turf(path, crds, virtual_z)
+	set waitfor = FALSE
+	. = new path (crds, virtual_z)
 
 /datum/parsed_map/proc/create_atom(path, crds)
 	set waitfor = FALSE
@@ -481,4 +495,9 @@
 
 /datum/parsed_map/Destroy()
 	..()
+	turf_blacklist.Cut()
+	parsed_bounds.Cut()
+	bounds.Cut()
+	grid_models.Cut()
+	gridSets.Cut()
 	return QDEL_HINT_HARDDEL_NOW

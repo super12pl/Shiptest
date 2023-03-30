@@ -15,14 +15,14 @@ It acts as a melee creature, chasing down and attacking its target while also us
 Whenever possible, the drake will breathe fire directly at it's target, igniting and heavily damaging anything caught in the blast.
 It also often causes lava to pool from the ground around you - many nearby turfs will temporarily turn into lava, dealing damage to anything on the turfs.
 The drake also utilizes its wings to fly into the sky, flying after its target and attempting to slam down on them. Anything near when it slams down takes huge damage.
- - Sometimes it will chain these swooping attacks over and over, making swiftness a necessity.
- - Sometimes, it will encase its target in an arena of lava
+- Sometimes it will chain these swooping attacks over and over, making swiftness a necessity.
+- Sometimes, it will encase its target in an arena of lava
 
 When an ash drake dies, it leaves behind a chest that can contain four things:
- 1. A spectral blade that allows its wielder to call ghosts to it, enhancing its power
- 2. A lava staff that allows its wielder to create lava
- 3. A spellbook and wand of fireballs
- 4. A bottle of dragon's blood with several effects, including turning its imbiber into a drake themselves.
+1. A spectral blade that allows its wielder to call ghosts to it, enhancing its power
+2. A lava staff that allows its wielder to create lava
+3. A spellbook and wand of fireballs
+4. A bottle of dragon's blood with several effects, including turning its imbiber into a drake themselves.
 
 When butchered, they leave behind diamonds, sinew, bone, and ash drake hide. Ash drake hide can be used to create a hooded cloak that protects its wearer from ash storms.
 
@@ -53,6 +53,7 @@ Difficulty: Medium
 	move_to_delay = 5
 	ranged = TRUE
 	pixel_x = -16
+	base_pixel_x = -16
 	crusher_loot = list(/obj/structure/closet/crate/necropolis/dragon/crusher)
 	loot = list(/obj/structure/closet/crate/necropolis/dragon)
 	butcher_results = list(/obj/item/gem/amber = 1, /obj/item/stack/ore/diamond = 5, /obj/item/stack/sheet/sinew = 5, /obj/item/stack/sheet/bone = 30)
@@ -73,10 +74,6 @@ Difficulty: Medium
 		/datum/action/innate/megafauna_attack/mass_fire,
 		/datum/action/innate/megafauna_attack/lava_swoop)
 	small_sprite_type = /datum/action/small_sprite/megafauna/drake
-
-/mob/living/simple_animal/hostile/megafauna/dragon/icemoon
-	dungeon = TRUE
-
 /datum/action/innate/megafauna_attack/fire_cone
 	name = "Fire Cone"
 	icon_icon = 'icons/obj/wizard.dmi'
@@ -271,7 +268,7 @@ Difficulty: Medium
 		T = check
 	return (getline(src, T) - get_turf(src))
 
-/mob/living/simple_animal/hostile/megafauna/dragon/proc/fire_line(var/list/turfs)
+/mob/living/simple_animal/hostile/megafauna/dragon/proc/fire_line(list/turfs)
 	SLEEP_CHECK_DEATH(0)
 	dragon_fire_line(src, turfs)
 
@@ -391,17 +388,6 @@ Difficulty: Medium
 	if(!lava_success)
 		arena_escape_enrage()
 
-/mob/living/simple_animal/hostile/megafauna/dragon/death()
-	//open all ashdrake gates
-	if(dungeon)
-		for(var/obj/machinery/door/poddoor/D in GLOB.machines)
-			if(D.id == "ash_drake_dead")
-				D.open()
-		for(var/obj/effect/landmark/ashdrake_ghost_spawn/L in GLOB.landmarks_list)
-			L.create_roles()
-
-	..()
-
 /obj/effect/landmark/ashdrake_ghost_spawn //spawn a random ghost role if ash drake is killed
 	name = "ash drake ghost role spawner"
 	var/picked
@@ -436,7 +422,7 @@ Difficulty: Medium
 		return FALSE
 	return ..()
 
-/mob/living/simple_animal/hostile/megafauna/dragon/visible_message(message, self_message, blind_message, vision_distance = DEFAULT_MESSAGE_RANGE, list/ignored_mobs, visible_message_flags = NONE)
+/mob/living/simple_animal/hostile/megafauna/dragon/visible_message(message, self_message, blind_message, vision_distance = DEFAULT_MESSAGE_RANGE, list/ignored_mobs, visible_message_flags = NONE, separation = " ")
 	if(swooping & SWOOP_INVULNERABLE) //to suppress attack messages without overriding every single proc that could send a message saying we got hit
 		return
 	return ..()
@@ -472,7 +458,7 @@ Difficulty: Medium
 	src.alpha = 63.75
 	animate(src, alpha = 255, time = duration)
 
-/obj/effect/temp_visual/lava_warning/proc/fall(var/reset_time)
+/obj/effect/temp_visual/lava_warning/proc/fall(reset_time)
 	var/turf/T = get_turf(src)
 	playsound(T,'sound/magic/fleshtostone.ogg', 80, TRUE)
 	sleep(duration)
@@ -637,3 +623,10 @@ Difficulty: Medium
 
 /mob/living/simple_animal/hostile/megafauna/dragon/lesser/grant_achievement(medaltype,scoretype)
 	return
+
+/mob/living/simple_animal/hostile/megafauna/dragon/icemoon
+
+/mob/living/simple_animal/hostile/megafauna/dragon/icemoon/death()
+	for(var/obj/effect/landmark/ashdrake_ghost_spawn/L in GLOB.landmarks_list)
+		L.create_roles()
+	..()

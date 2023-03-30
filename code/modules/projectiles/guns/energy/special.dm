@@ -1,7 +1,6 @@
 /obj/item/gun/energy/ionrifle
 	name = "ion rifle"
 	desc = "A man-portable anti-armor weapon designed to disable mechanical threats at range."
-	icon = 'whitesands/icons/obj/guns/energy.dmi' //WS edit
 	icon_state = "ionrifle"
 	item_state = null	//so the human update icon uses the icon_state instead.
 	shaded_charge = FALSE
@@ -53,10 +52,11 @@
 	desc = "A tool that discharges controlled radiation which induces mutation in plant cells."
 	icon_state = "flora"
 	item_state = "gun"
-	ammo_type = list(/obj/item/ammo_casing/energy/flora/yield, /obj/item/ammo_casing/energy/flora/mut)
+	ammo_type = list(/obj/item/ammo_casing/energy/flora/yield, /obj/item/ammo_casing/energy/flora/mut, /obj/item/ammo_casing/energy/flora/revolution)
 	modifystate = 1
 	ammo_x_offset = 1
 	selfcharge = 1
+	shaded_charge = 1
 
 /obj/item/gun/energy/meteorgun
 	name = "meteor gun"
@@ -65,7 +65,7 @@
 	item_state = "c20r"
 	w_class = WEIGHT_CLASS_BULKY
 	ammo_type = list(/obj/item/ammo_casing/energy/meteor)
-	cell_type = "/obj/item/stock_parts/cell/potato"
+	cell_type = /obj/item/stock_parts/cell/potato
 	clumsy_check = 0 //Admin spawn only, might as well let clowns use it.
 	selfcharge = 1
 
@@ -140,9 +140,6 @@
 	toolspeed = 0.7 //plasmacutters can be used as welders, and are faster than standard welders
 	internal_cell = TRUE //so you don't cheese through the need for plasma - WS EDIT
 	var/charge_weld = 25 //amount of charge used up to start action (multiplied by amount) and per progress_flash_divisor ticks of welding
-	weapon_weight = WEAPON_LIGHT
-	fire_rate = 3
-	automatic = 1
 
 /obj/item/gun/energy/plasmacutter/ComponentInitialize()
 	. = ..()
@@ -191,7 +188,9 @@
 
 /obj/item/gun/energy/plasmacutter/use_tool(atom/target, mob/living/user, delay, amount=1, volume=0, datum/callback/extra_checks)
 	if(amount)
+		target.add_overlay(GLOB.welding_sparks)
 		. = ..()
+		target.cut_overlay(GLOB.welding_sparks)
 	else
 		. = ..(amount=1)
 
@@ -204,31 +203,13 @@
 
 /obj/item/gun/energy/wormhole_projector
 	name = "bluespace wormhole projector"
-	desc = "A projector that emits high density quantum-coupled bluespace beams. Requires an anomaly core to function." //WS Edit - Any anomaly core for phazons
+	desc = "A projector that emits high density quantum-coupled bluespace beams." //WS Edit - Any anomaly core for phazons
 	ammo_type = list(/obj/item/ammo_casing/energy/wormhole, /obj/item/ammo_casing/energy/wormhole/orange)
 	item_state = null
 	icon_state = "wormhole_projector"
 	var/obj/effect/portal/p_blue
 	var/obj/effect/portal/p_orange
 	var/atmos_link = FALSE
-	var/firing_core = FALSE
-
-/obj/item/gun/energy/wormhole_projector/attackby(obj/item/C, mob/user)
-	if(istype(C, /obj/item/assembly/signaler/anomaly)) //WS Edit - Any anomaly core for phazons
-		to_chat(user, "<span class='notice'>You insert [C] into the wormhole projector and the weapon gently hums to life.</span>")
-		firing_core = TRUE
-		playsound(src.loc, 'sound/machines/click.ogg', 50, TRUE)
-		qdel(C)
-		return
-
-/obj/item/gun/energy/wormhole_projector/can_shoot()
-	if(!firing_core)
-		return FALSE
-	return ..()
-
-/obj/item/gun/energy/wormhole_projector/shoot_with_empty_chamber(mob/living/user)
-	. = ..()
-	to_chat(user, "<span class='danger'>The display says, 'NO CORE INSTALLED'.</span>")
 
 /obj/item/gun/energy/wormhole_projector/update_icon_state()
 	icon_state = item_state = "[initial(icon_state)][select]"
@@ -287,40 +268,69 @@
 		p_blue = P
 	crosslink()
 
-/obj/item/gun/energy/wormhole_projector/core_inserted
-	firing_core = TRUE
-
 /* 3d printer 'pseudo guns' for borgs */
 
 /obj/item/gun/energy/printer
-	name = "cyborg lmg"
-	desc = "An LMG that fires 3D-printed flechettes. They are slowly resupplied using the cyborg's internal power source."
+	name = "integrated LMG"
+	desc = "A modified energy weapon re-designed to fire 3D-printed flechettes, pulled directly from the cyborg's internal power source."
 	icon_state = "l6_cyborg"
 	icon = 'icons/obj/guns/projectile.dmi'
-	cell_type = "/obj/item/stock_parts/cell/secborg"
+	cell_type = /obj/item/stock_parts/cell/secborg
 	ammo_type = list(/obj/item/ammo_casing/energy/c3dbullet)
 	can_charge = FALSE
 	use_cyborg_cell = TRUE
-	automatic = 1
-	fire_rate = 6
 
 /obj/item/gun/energy/printer/ComponentInitialize()
 	. = ..()
 	AddElement(/datum/element/update_icon_blocker)
+	AddComponent(/datum/component/automatic_fire, 0.3 SECONDS)
 
 /obj/item/gun/energy/printer/emp_act()
 	return
 
+//the future of mid-range borg marksmanship. Get tactical.
+/obj/item/gun/energy/printer/commando
+	name = "integrated TAC-rifle"
+	desc = "A shoulder-mounted high-caliber ballistic weapon. Capable of supporting prolonged encounters by printing heavy rounds directly off the host cyborg's power supplies."
+	ammo_type = list(/obj/item/ammo_casing/energy/ctac, /obj/item/ammo_casing/energy/csour, /obj/item/ammo_casing/energy/csweet)
+	var/tac_ammo = 1
+
+/obj/item/gun/energy/printer/commando/examine()
+	. = ..()
+	. += "<span class='notice'> Can be reconfigured inhand to print different projectile designs.</span>"
+
+/obj/item/gun/energy/printer/commando/attack_self(mob/living/user as mob)
+	if(ammo_type.len > 1)
+		tac_fire(user)
+		update_icon()
+
+/obj/item/gun/energy/printer/commando/proc/tac_fire(mob/living/user)
+	select++
+	if (select > ammo_type.len)
+		select = 1
+	var/obj/item/ammo_casing/energy/shot = ammo_type[select]
+	fire_sound = shot.fire_sound
+	fire_delay = shot.delay
+	if (shot.select_name)
+		playsound(get_turf(user), 'sound/items/change_drill.ogg', 50, TRUE)
+		if(shot.select_name == "tactical")
+			to_chat(user, "<span class='notice'>You configure the [src] to fire CY-TACTICAL high-velocity impact rounds.</span>")
+		if(shot.select_name == "sweet")
+			to_chat(user, "<span class='notice'>You set your [src] to fire CY-SWEET distruptor rounds, which travel slowly and do little damage, but irradiate and ignite targets.</span>")
+		if(shot.select_name == "sour")
+			to_chat(user, "<span class='notice'>You rearm your [src] with CY-SOUR nonlethal rounds, which cause stamina damage and distrupt the focus of enemies.</span>")
+	chambered = null
+	recharge_newshot(TRUE)
+	update_icon()
+	return
+
 /obj/item/gun/energy/temperature
 	name = "temperature gun"
-	icon = 'whitesands/icons/obj/guns/energy.dmi' //WS edit
 	icon_state = "freezegun"
 	desc = "A gun that changes temperatures."
 	ammo_type = list(/obj/item/ammo_casing/energy/temp, /obj/item/ammo_casing/energy/temp/hot)
-	cell_type = "/obj/item/stock_parts/cell/gun/upgraded"
+	cell_type = /obj/item/stock_parts/cell/gun/upgraded
 	ammo_x_offset = 2
-	automatic = 1
-	fire_rate = 4
 	pin = null
 
 /obj/item/gun/energy/temperature/security
@@ -377,3 +387,15 @@
 		return FALSE
 	return ..()
 
+/obj/item/gun/energy/tesla_cannon
+	name = "tesla cannon"
+	icon_state = "tesla"
+	item_state = "tesla"
+	desc = "A gun that shoots balls of \"tesla\", whatever that is."
+	ammo_type = list(/obj/item/ammo_casing/energy/tesla_cannon)
+	shaded_charge = TRUE
+	weapon_weight = WEAPON_HEAVY
+
+/obj/item/gun/energy/tesla_cannon/ComponentInitialize()
+	. = ..()
+	AddComponent(/datum/component/automatic_fire, 0.1 SECONDS)

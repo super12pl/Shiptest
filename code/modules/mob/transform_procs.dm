@@ -42,7 +42,7 @@
 		cavity_object = CH.cavity_item
 		CH.cavity_item = null
 
-	var/mob/living/carbon/monkey/O = new /mob/living/carbon/monkey( loc )
+	var/mob/living/carbon/monkey/O = new /mob/living/carbon/monkey(loc)
 
 	// hash the original name?
 	if(tr_flags & TR_HASHNAME)
@@ -51,6 +51,7 @@
 
 	//handle DNA and other attributes
 	dna.transfer_identity(O)
+	O.set_species(/datum/species/monkey)
 	O.updateappearance(icon_update=0)
 
 	if(tr_flags & TR_KEEPSE)
@@ -213,7 +214,7 @@
 		cavity_object = CH.cavity_item
 		CH.cavity_item = null
 
-	var/mob/living/carbon/human/O = new( loc )
+	var/mob/living/carbon/human/O = new(loc)
 	for(var/obj/item/C in O.loc)
 		if(C.anchored)
 			continue
@@ -326,6 +327,11 @@
 			for(var/datum/action/changeling/humanform/HF in changeling.purchasedpowers)
 				changeling.purchasedpowers -= HF
 				changeling.regain_powers()
+
+	if(O.dna.species && !istype(O.dna.species, /datum/species/monkey))
+		O.set_species(O.dna.species)
+	else
+		O.set_species(/datum/species/human)
 
 	O.a_intent = INTENT_HELP
 	if (tr_flags & TR_DEFAULTMSG)

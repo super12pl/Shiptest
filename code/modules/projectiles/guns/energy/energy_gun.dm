@@ -1,8 +1,7 @@
 /obj/item/gun/energy/e_gun
-	name = "energy gun"
+	name = "energy rifle"
 	desc = "A basic hybrid energy gun with two settings: disable and kill."
 	icon_state = "energy"
-	icon = 'whitesands/icons/obj/guns/energy.dmi' //WS edit
 	item_state = null	//so the human update icon uses the icon_state instead.
 	ammo_type = list(/obj/item/ammo_casing/energy/disabler, /obj/item/ammo_casing/energy/laser)
 	modifystate = 1
@@ -10,7 +9,10 @@
 	ammo_x_offset = 3
 	flight_x_offset = 15
 	flight_y_offset = 10
-	weapon_weight = WEAPON_MEDIUM
+	dual_wield_spread = 60
+
+/obj/item/gun/energy/e_gun/mindshield
+	pin = /obj/item/firing_pin/implant/mindshield
 
 /obj/item/gun/energy/e_gun/mini
 	name = "miniature energy gun"
@@ -26,7 +28,6 @@
 	gunlight_state = "mini-light"
 	flight_x_offset = 19
 	flight_y_offset = 13
-	weapon_weight = WEAPON_LIGHT
 
 /obj/item/gun/energy/e_gun/mini/Initialize()
 	set_gun_light(new /obj/item/flashlight/seclite(src))
@@ -59,10 +60,20 @@
 	icon_state = "hoslaser"
 	force = 10
 	ammo_type = list(/obj/item/ammo_casing/energy/disabler/hos, /obj/item/ammo_casing/energy/laser/hos, /obj/item/ammo_casing/energy/ion/hos, /obj/item/ammo_casing/energy/electrode/hos)
-	automatic = 1
-	fire_rate = 3
 	shaded_charge = TRUE
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | ACID_PROOF
+
+/obj/item/gun/energy/e_gun/hos/brazil
+	name = "modified antique laser gun"
+	desc = "It's somehow modified to have more firemodes."
+	icon_state = "capgun_brazil_hos"
+	item_state = "hoslaser"
+
+/obj/item/gun/energy/e_gun/hos/brazil/true
+	desc = "By using a original antique laser gun with a intact nuclear power cell, it is truly one of the finest weapons in this area of space."
+	icon_state = "capgun_hos"
+	item_state = "hoslaser"
+	selfcharge = 1
 
 /obj/item/gun/energy/e_gun/dragnet
 	name = "\improper DRAGnet"
@@ -74,7 +85,6 @@
 	ammo_type = list(/obj/item/ammo_casing/energy/net, /obj/item/ammo_casing/energy/trap)
 	can_flashlight = FALSE
 	ammo_x_offset = 1
-	fire_rate = 1.5
 
 /obj/item/gun/energy/e_gun/dragnet/snare
 	name = "Energy Snare Launcher"
@@ -93,8 +103,6 @@
 	can_flashlight = FALSE
 	trigger_guard = TRIGGER_GUARD_NONE
 	ammo_x_offset = 2
-	automatic = 1
-	fire_rate = 5
 
 /obj/item/gun/energy/e_gun/nuclear
 	name = "advanced energy gun"
@@ -154,3 +162,48 @@
 				. += "[icon_state]_fail_1"
 			if(151 to INFINITY)
 				. += "[icon_state]_fail_2"
+
+/obj/item/gun/energy/e_gun/rdgun
+	name = "research director's PDW"
+	desc = "A energy revolver made from the power of science, but more importantly booze. Only has 6 shots."
+	icon_state = "rdpdw"
+	item_state = "gun"
+	ammo_x_offset = 2
+	charge_sections = 6
+	small_gun = TRUE
+	ammo_type = list(/obj/item/ammo_casing/energy/disabler/hitscan, /obj/item/ammo_casing/energy/ion/cheap)
+	cell_type = /obj/item/stock_parts/cell/gun/mini
+
+/obj/item/gun/energy/e_gun/adv_stopping
+	name = "advanced stopping revolver"
+	desc = "An advanced energy revolver with the capacity to shoot both disabler and lethal lasers, as well as futuristic safari nets."
+	icon_state = "bsgun"
+	item_state = "gun"
+	force = 7
+	ammo_type = list(/obj/item/ammo_casing/energy/disabler/hos, /obj/item/ammo_casing/energy/laser/hos, /obj/item/ammo_casing/energy/trap)
+	ammo_x_offset = 1
+	shaded_charge = TRUE
+
+/obj/item/gun/energy/e_gun/smg
+	name = "\improper E-TAR SMG"
+	desc = "A dual-mode energy gun capable of discharging weaker shots at a much faster rate than the standard energy gun."
+	icon_state = "esmg"
+	ammo_type = list(/obj/item/ammo_casing/energy/disabler/smg, /obj/item/ammo_casing/energy/laser/smg)
+	ammo_x_offset = 2
+	charge_sections = 3
+	weapon_weight = WEAPON_LIGHT
+
+/obj/item/gun/energy/e_gun/iot
+	name = "\improper E-SG 500 Second Edition"
+	desc = "A improved version of the E-SG 255. It now includes two firing modes, disable and kill, while still keeping that sweed integrated computer. Please note that the screen is right next to the switch mode button."
+	lefthand_file = 'icons/mob/inhands/weapons/64x_guns_left.dmi'
+	righthand_file = 'icons/mob/inhands/weapons/64x_guns_right.dmi'
+	inhand_x_dimension = 64
+	inhand_y_dimension = 64
+	icon_state = "iotshotgun"
+	item_state = "shotgun_combat"
+	shaded_charge = 1
+	w_class = WEIGHT_CLASS_BULKY
+	ammo_type = list(/obj/item/ammo_casing/energy/disabler/scatter/ultima, /obj/item/ammo_casing/energy/laser/ultima)
+	var/obj/item/modular_computer/integratedNTOS
+	var/NTOS_type = /obj/item/modular_computer/internal

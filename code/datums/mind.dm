@@ -91,6 +91,7 @@
 	var/list/crew_objectives
 
 /datum/mind/New(_key)
+	SSticker.minds += src
 	key = _key
 	soulOwner = src
 	martial_art = default_martial_art
@@ -101,7 +102,25 @@
 	if(islist(antag_datums))
 		QDEL_LIST(antag_datums)
 	QDEL_NULL(language_holder)
+	enslaved_to = null
+	soulOwner = null
+	martial_art = null
+	current = null
+	original_character = null
+	leave_all_antag_huds()
 	return ..()
+
+/datum/mind/proc/handle_mob_deletion(mob/deleted_mob)
+	if (current == deleted_mob)
+		current = null
+	if (original_character == deleted_mob)
+		original_character = null
+	if (src == deleted_mob.mind)
+		deleted_mob.mind = null
+	if (istype(deleted_mob, /mob/living/carbon))
+		var/mob/living/carbon/deleted_carbon = deleted_mob
+		if (src == deleted_carbon.last_mind)
+			deleted_carbon.last_mind = null
 
 /datum/mind/proc/get_language_holder()
 	if(!language_holder)
@@ -263,7 +282,7 @@
 	var/datum/team/antag_team = A.get_team()
 	if(antag_team)
 		antag_team.add_member(src)
-	A.on_gain()
+	INVOKE_ASYNC(A, /datum/antagonist.proc/on_gain)
 	log_game("[key_name(src)] has gained antag datum [A.name]([A.type])")
 	return A
 
@@ -806,10 +825,9 @@
 /mob/proc/mind_initialize()
 	if(mind)
 		mind.key = key
-
 	else
 		mind = new /datum/mind(key)
-		SSticker.minds += mind
+
 	if(!mind.name)
 		mind.name = real_name
 	mind.current = src

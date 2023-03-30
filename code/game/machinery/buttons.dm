@@ -204,7 +204,7 @@
 	..()
 
 /obj/machinery/button/door/incinerator_vent_toxmix
-	name = "combustion chamber vent control"
+	name = "Combustion Chamber Vent control"
 	id = INCINERATOR_TOXMIX_VENT
 	req_access = list(ACCESS_TOX)
 
@@ -214,7 +214,7 @@
 	req_one_access = list(ACCESS_ATMOSPHERICS, ACCESS_MAINT_TUNNELS)
 
 /obj/machinery/button/door/incinerator_vent_atmos_aux
-	name = "combustion chamber vent control"
+	name = "Combustion Chamber Vent control"
 	id = INCINERATOR_ATMOS_AUXVENT
 	req_one_access = list(ACCESS_ATMOSPHERICS, ACCESS_MAINT_TUNNELS)
 
@@ -224,7 +224,7 @@
 	req_access = list(ACCESS_SYNDICATE)
 
 /obj/machinery/button/door/incinerator_vent_syndicatelava_aux
-	name = "combustion chamber vent control"
+	name = "Combustion Chamber Vent control"
 	id = INCINERATOR_SYNDICATELAVA_AUXVENT
 	req_access = list(ACCESS_SYNDICATE)
 
@@ -303,3 +303,12 @@
 	. = ..()
 	. += "<span class='notice'>There's a small inscription on the button...</span>"
 	. += "<span class='notice'>THIS CALLS THE ELEVATOR! IT DOES NOT OPERATE IT! Interact with the elevator itself to use it!</span>"
+
+/obj/machinery/button/shieldwallgen
+	name = "holofield switch"
+	desc = "A remote switch for a holofield generator"
+	icon_state = "launcher"
+	skin = "launcher"
+	device_type = /obj/item/assembly/control/shieldwallgen
+	req_access = list()
+	id = 1

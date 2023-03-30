@@ -159,8 +159,26 @@
 /obj/item/clothing/under/misc/coordinator
 	name = "coordinator jumpsuit"
 	desc = "A jumpsuit made by party people, from party people, for party people."
-	icon = 'icons/obj/clothing/under/captain.dmi'
-	mob_overlay_icon = 'icons/mob/clothing/under/captain.dmi'
+	icon = 'icons/obj/clothing/under/command.dmi'
+	mob_overlay_icon = 'icons/mob/clothing/under/command.dmi'
 	icon_state = "captain_parade"
 	item_state = "by_suit"
 	can_adjust = FALSE
+
+/obj/item/clothing/under/utility
+	icon = 'icons/obj/clothing/under/misc.dmi'
+	mob_overlay_icon = 'icons/mob/clothing/under/misc.dmi'
+	name = "utility jumpsuit"
+	desc = "A somewhat uncomfortable suit designed to be as cheap as possible to manufacture."
+	icon_state = "utility"
+	item_state = "utility"
+	can_adjust = TRUE
+
+/obj/item/clothing/under/utility/skirt //trolled.
+	name = "utility jumpskirt"
+	desc = "A somewhat uncomfortable suit designed to be as cheap as possible to manufacture. This one has a skirt."
+	body_parts_covered = CHEST|GROIN|ARMS
+	icon_state = "utility_skirt"
+	item_state = "utility_skirt"
+	can_adjust = FALSE
+	supports_variations = DIGITIGRADE_VARIATION_NO_NEW_ICON | VOX_VARIATION

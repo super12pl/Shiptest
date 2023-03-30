@@ -137,7 +137,7 @@
 "JO" = (
 /obj/machinery/door/airlock/highsecurity{
 	hackProof = 1;
-	name = "secure airlock"
+	name = "Secure Airlock"
 	},
 /turf/open/floor/mineral/plastitanium{
 	name = "base floor"
@@ -202,8 +202,6 @@
 "PX" = (
 /turf/open/floor/carpet,
 /area/ruin/unpowered/syndicate_outpost)
-"PZ" = (
-)
 "RV" = (
 /turf/open/floor/plating/asteroid/basalt/lava_land_surface,
 /area/ruin/unpowered/syndicate_outpost)
@@ -295,7 +293,7 @@ Wt
 Wt
 Wt
 Wt
-PZ
+Wt
 "}
 (2,1,1) = {"
 IZ

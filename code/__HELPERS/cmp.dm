@@ -110,6 +110,18 @@ GLOBAL_VAR_INIT(cmp_field, "name")
 	else
 		return sorttext(b_name, a_name)
 
+/proc/cmp_quirk_value_dsc(datum/quirk/A, datum/quirk/B)
+	var/a_value = initial(A.value)
+	var/b_value = initial(B.value)
+
+	var/a_name = initial(A.name)
+	var/b_name = initial(B.name)
+
+	if(a_value != b_value)
+		return b_value - a_value
+	else
+		return sorttext(b_name, a_name)
+
 /proc/cmp_job_display_asc(datum/job/A, datum/job/B)
 	return A.display_order - B.display_order
 
@@ -124,10 +136,3 @@ GLOBAL_VAR_INIT(cmp_field, "name")
 
 /proc/cmp_pdajob_asc(obj/item/pda/A, obj/item/pda/B)
 	return sorttext(B.ownjob, A.ownjob)
-
-// begin shiptest
-/proc/cmp_reservations_asc(datum/turf_reservation/A, datum/turf_reservation/B)
-	if(A.bottom_left_coords[2] != B.bottom_left_coords[2]) // sort reserves by Y
-		return cmp_numeric_asc(A.bottom_left_coords[2], B.bottom_left_coords[2])
-	return cmp_numeric_asc(A.bottom_left_coords[1], B.bottom_left_coords[1]) // then by X
-// end shiptest

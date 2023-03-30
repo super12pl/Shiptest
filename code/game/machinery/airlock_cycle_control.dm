@@ -56,14 +56,14 @@
 /obj/item/wallframe/advanced_airlock_controller
 	name = "airlock controller frame"
 	desc = "Used for building advanced airlock controllers."
-	icon = 'whitesands/icons/obj/monitors.dmi'
+	icon = 'icons/obj/monitors.dmi'
 	icon_state = "aac_bitem"
 	result_path = /obj/machinery/advanced_airlock_controller
 
 /obj/machinery/advanced_airlock_controller
 	name = "advanced airlock controller"
 	desc = "A machine designed to control the operation of cycling airlocks"
-	icon = 'whitesands/icons/obj/monitors.dmi'
+	icon = 'icons/obj/monitors.dmi'
 	icon_state = "aac"
 	use_power = IDLE_POWER_USE
 	idle_power_usage = 4
@@ -95,7 +95,7 @@
 	var/scan_on_late_init = FALSE
 	var/depressurization_margin = 10 // use a lower value to reduce cross-contamination
 	var/overlays_hash = null
-	var/skip_delay = 300
+	var/skip_delay = 10
 	var/skip_timer = 0
 	var/is_skipping = FALSE
 
@@ -106,10 +106,14 @@
 /obj/machinery/advanced_airlock_controller/lavaland
 	exterior_pressure = WARNING_LOW_PRESSURE + 10
 	depressurization_margin = ONE_ATMOSPHERE
-	skip_delay = 30
+	skip_delay = 10
 
 /obj/machinery/advanced_airlock_controller/mix_chamber
 	depressurization_margin = 0.15 // The minimum - We really don't want contamination.
+
+/obj/machinery/advanced_airlock_controller/internal //cycles doors but doesn't drain
+	exterior_pressure = ONE_ATMOSPHERE
+	depressurization_margin = ONE_ATMOSPHERE
 
 /obj/machinery/advanced_airlock_controller/New(loc, ndir, nbuild)
 	..()
@@ -129,12 +133,12 @@
 	qdel(wires)
 	wires = null
 	cut_links()
-	SSair.atmos_machinery -= src
+	SSair.stop_processing_machine(src)
 	return ..()
 
 /obj/machinery/advanced_airlock_controller/Initialize(mapload)
 	. = ..()
-	SSair.atmos_machinery += src
+	SSair.start_processing_machine(src)
 	scan_on_late_init = mapload
 	if(mapload && (. != INITIALIZE_HINT_QDEL))
 		return INITIALIZE_HINT_LATELOAD
@@ -481,7 +485,7 @@
 				if (W.use_tool(src, user, 20))
 					if (buildstage == BUILD_NO_WIRES)
 						to_chat(user, "<span class='notice'>You remove the airlock controller electronics.</span>")
-						new /obj/item/electronics/advanced_airlock_controller( src.loc )
+						new /obj/item/electronics/advanced_airlock_controller(src.loc)
 						playsound(src.loc, 'sound/items/deconstruct.ogg', 50, 1)
 						buildstage = BUILD_NO_CIRCUIT
 						update_icon()
@@ -529,7 +533,7 @@
 			if(W.tool_behaviour == TOOL_WRENCH)
 				to_chat(user, "<span class='notice'>You detach \the [src] from the wall.</span>")
 				W.play_tool_sound(src)
-				new /obj/item/wallframe/advanced_airlock_controller( user.loc )
+				new /obj/item/wallframe/advanced_airlock_controller(user.loc)
 				qdel(src)
 				return
 
@@ -581,6 +585,9 @@
 					if(assume_roles)
 						for(var/adir in GLOB.cardinals)					// Checking all the turfs around the airlock
 							var/turf/check_turf = get_step(T2, adir)
+							if(!check_turf) // No turf to be found? It's likely an external one in that case, if not, cry about it. (Mainly for ships)
+								airlocks[A] = EXTERIOR_AIRLOCK
+								break
 							if(check_turf.initial_gas_mix != OPENTURF_DEFAULT_ATMOS)
 								airlocks[A] = EXTERIOR_AIRLOCK
 								break
@@ -627,7 +634,7 @@
 
 	var/data = list(
 		"locked" = locked,
-		"siliconUser" = user.has_unlimited_silicon_privilege,
+		"siliconUser" = user.has_unlimited_silicon_privilege && check_ship_ai_access(user),
 		"emagged" = (obj_flags & EMAGGED ? 1 : 0),
 		"cyclestate" = cyclestate,
 		"pressure" = pressure,

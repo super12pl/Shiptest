@@ -14,6 +14,7 @@
 	var/spillable = FALSE
 	var/list/fill_icon_thresholds = null
 	var/fill_icon_state = null // Optional custom name for reagent fill icon_state prefix
+	var/fill_icon = 'icons/obj/reagentfillings.dmi'
 
 	/// To enable caps, set can_have_cap to TRUE and define a cap_icon_state. Do not change at runtime.
 	var/can_have_cap = FALSE
@@ -62,26 +63,42 @@
 	update_icon()
 
 /obj/item/reagent_containers/examine(mob/user)
-	if(!can_have_cap)
-		return ..()
-
 	. = ..()
-	if(cap_lost)
-		. += "<span class='notice'>The cap seems to be missing.</span>"
-	else if(cap_on)
-		. += "<span class='notice'>The cap is firmly on to prevent spilling. Alt-click to remove the cap.</span>"
+	if(istype(src, /obj/item/reagent_containers/glass))
+		. += "<span class='notice'>Currently transferring [amount_per_transfer_from_this]u with each pour.</span>"
+	if(istype(src, /obj/item/reagent_containers/dropper))
+		. += "<span class='notice'>Currently squeezing out [amount_per_transfer_from_this]u drops.</span>"
+	if(istype(src, /obj/item/reagent_containers/syringe))
+		. += "<span class='notice'>Currently injecting [amount_per_transfer_from_this]u at a time.</span>"
+	if(!can_have_cap)
+		return
 	else
-		. += "<span class='notice'>The cap has been taken off. Alt-click to put a cap on.</span>"
+		if(cap_lost)
+			. += "<span class='notice'>The cap seems to be missing.</span>"
+		else if(cap_on)
+			. += "<span class='notice'>The cap is firmly on to prevent spilling. Alt-click to remove the cap.</span>"
+		else
+			. += "<span class='notice'>The cap has been taken off. Alt-click to put a cap on.</span>"
+
+/obj/item/reagent_containers/is_injectable(mob/user, allowmobs = TRUE)
+	if(can_have_cap && cap_on)
+		return FALSE
+	return ..()
+
+/obj/item/reagent_containers/is_drawable(mob/user, allowmobs = TRUE)
+	if(can_have_cap && cap_on)
+		return FALSE
+	return ..()
 
 /obj/item/reagent_containers/is_refillable()
 	if(can_have_cap && cap_on)
 		return FALSE
-	. = ..()
+	return ..()
 
 /obj/item/reagent_containers/is_drainable()
 	if(can_have_cap && cap_on)
 		return FALSE
-	. = ..()
+	return ..()
 
 /obj/item/reagent_containers/attack_self(mob/user)
 	if(possible_transfer_amounts.len)
@@ -93,12 +110,32 @@
 					amount_per_transfer_from_this = possible_transfer_amounts[i+1]
 				else
 					amount_per_transfer_from_this = possible_transfer_amounts[1]
-				to_chat(user, "<span class='notice'>[src]'s transfer amount is now [amount_per_transfer_from_this] units.</span>")
+				balloon_alert(user, "Transferring [amount_per_transfer_from_this]u")
 				return
 
 /obj/item/reagent_containers/attack(mob/M, mob/user, def_zone)
 	if(user.a_intent == INTENT_HARM)
 		return ..()
+
+/obj/item/reagent_containers/proc/attempt_pour(atom/target, mob/user)
+	if(ismob(target) || !reagents.total_volume || !check_allowed_items(target, target_self = FALSE))
+		return
+
+	target.visible_message("<span class='notice'>[user] attempts to pour [src] onto [target].</span>")
+	if(!do_after(user, 3 SECONDS, target=target))
+		return
+	// reagents may have been emptied
+	if(!is_drainable() || !reagents.total_volume)
+		return
+	playsound(src, 'sound/items/glass_splash.ogg', 50, 1)
+	target.visible_message("<span class='notice'>[user] pours [src] onto [target].</span>")
+	log_combat(user, target, "poured [english_list(reagents.reagent_list)]", "in [AREACOORD(target)]")
+	log_game("[key_name(user)] poured [english_list(reagents.reagent_list)] on [target] in [AREACOORD(target)].")
+	var/frac = min(amount_per_transfer_from_this/reagents.total_volume, 1)
+	// don't use trans_to, because we're not ADDING it to the object, we're just... pouring it.
+	reagents.expose(target, TOUCH, frac)
+	for(var/datum/reagent/reag as anything in reagents.reagent_list)
+		reagents.remove_reagent(reag.type, reag.volume * frac)
 
 /obj/item/reagent_containers/AltClick(mob/user)
 	. = ..()
@@ -118,6 +155,7 @@
 		else
 			set_cap_status(TRUE)
 			to_chat(user, "<span class='notice'>You put the cap on [src].</span>")
+		playsound(src, 'sound/items/glass_cap.ogg', 50, 1)
 
 /obj/item/reagent_containers/proc/canconsume(mob/eater, mob/user)
 	if(!iscarbon(eater))
@@ -169,6 +207,7 @@
 			reagents.total_volume *= rand(5,10) * 0.1 //Not all of it makes contact with the target
 		var/mob/M = target
 		var/R
+		playsound(src, 'sound/items/glass_splash.ogg', 50, 1)
 		target.visible_message("<span class='danger'>[M] is splashed with something!</span>", \
 						"<span class='userdanger'>[M] is splashed with something!</span>")
 		for(var/datum/reagent/A in reagents.reagent_list)
@@ -187,6 +226,7 @@
 			log_combat(thrownby, target, "splashed (thrown) [english_list(reagents.reagent_list)]", "in [AREACOORD(target)]")
 			log_game("[key_name(thrownby)] splashed (thrown) [english_list(reagents.reagent_list)] on [target] in [AREACOORD(target)].")
 			message_admins("[ADMIN_LOOKUPFLW(thrownby)] splashed (thrown) [english_list(reagents.reagent_list)] on [target] in [ADMIN_VERBOSEJMP(target)].")
+		playsound(src, 'sound/items/glass_splash.ogg', 50, 1)
 		visible_message("<span class='notice'>[src] spills its contents all over [target].</span>")
 		reagents.expose(target, TOUCH)
 		if(QDELETED(src))
@@ -203,13 +243,15 @@
 
 /obj/item/reagent_containers/attackby(obj/item/I, mob/user, params) //procs dip_object any time an object is used on a container, makes the noises if any reagent returned true
 	var/success = FALSE
-	if(!src.cap_on)
+	if(is_refillable())
 		for(var/datum/reagent/R in reagents.reagent_list)
 			if(R.dip_object(I, user, src))
 				success = TRUE
 		if(success)
 			to_chat(user, "<span class='notice'>You dip [I] into [src], and the solution begins to bubble.</span>")
 			playsound(src, 'sound/effects/bubbles.ogg', 80, TRUE)
+			return TRUE
+	return ..()
 
 /obj/item/reagent_containers/on_reagent_change(changetype)
 	update_icon()
@@ -222,7 +264,7 @@
 		return
 	if(reagents.total_volume)
 		var/fill_name = fill_icon_state? fill_icon_state : icon_state
-		var/mutable_appearance/filling = mutable_appearance('icons/obj/reagentfillings.dmi', "[fill_name][fill_icon_thresholds[1]]")
+		var/mutable_appearance/filling = mutable_appearance(fill_icon, "[fill_name][fill_icon_thresholds[1]]")
 
 		var/percent = round((reagents.total_volume / volume) * 100)
 		for(var/i in 1 to fill_icon_thresholds.len)

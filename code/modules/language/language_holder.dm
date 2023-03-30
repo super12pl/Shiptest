@@ -211,7 +211,7 @@ Key procs
 
 /// Copies all languages from the supplied atom/language holder. Source should be overridden when you
 /// do not want the language overwritten by later atom updates or want to avoid blocked languages.
-/datum/language_holder/proc/copy_languages(var/datum/language_holder/from_holder, source_override)
+/datum/language_holder/proc/copy_languages(datum/language_holder/from_holder, source_override)
 	if(source_override)	//No blocked languages here, for now only used by ling absorb.
 		for(var/language in from_holder.understood_languages)
 			grant_language(language, TRUE, FALSE, source_override)
@@ -246,9 +246,9 @@ Key procs
 
 /datum/language_holder/drone
 	understood_languages = list(/datum/language/drone = list(LANGUAGE_ATOM),
-								/datum/language/machine = list(LANGUAGE_ATOM))
+								/datum/language/machine = list(LANGUAGE_ATOM),
+								/datum/language/common = list(LANGUAGE_ATOM))
 	spoken_languages = list(/datum/language/drone = list(LANGUAGE_ATOM))
-	blocked_languages = list(/datum/language/common = list(LANGUAGE_ATOM))
 
 /datum/language_holder/drone/syndicate
 	blocked_languages = list()
@@ -311,21 +311,25 @@ Key procs
 								/datum/language/draconic = list(LANGUAGE_ATOM),
 								/datum/language/moffic = list(LANGUAGE_ATOM),
 								/datum/language/calcic = list(LANGUAGE_ATOM),
-								/datum/language/voltaic = list(LANGUAGE_ATOM),
 								/datum/language/rylethian = list(LANGUAGE_ATOM),
 								/datum/language/spider = list(LANGUAGE_ATOM),
 								/datum/language/dwarf = list(LANGUAGE_ATOM),
-								/datum/language/schechi = list(LANGUAGE_ATOM))
+								/datum/language/teceti_unified = list(LANGUAGE_ATOM))
 	spoken_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
 							/datum/language/machine = list(LANGUAGE_ATOM),
 							/datum/language/draconic = list(LANGUAGE_ATOM),
 							/datum/language/moffic = list(LANGUAGE_ATOM),
 							/datum/language/calcic = list(LANGUAGE_ATOM),
-							/datum/language/voltaic = list(LANGUAGE_ATOM),
 							/datum/language/rylethian = list(LANGUAGE_ATOM),
 							/datum/language/spider = list(LANGUAGE_ATOM),
 							/datum/language/dwarf = list(LANGUAGE_ATOM),
-							/datum/language/schechi = list(LANGUAGE_ATOM))
+							/datum/language/teceti_unified = list(LANGUAGE_ATOM))
+
+/datum/language_holder/ipc
+	understood_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
+								/datum/language/machine = list(LANGUAGE_ATOM))
+	spoken_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
+							/datum/language/machine = list(LANGUAGE_ATOM))
 
 /datum/language_holder/moth
 	understood_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
@@ -343,9 +347,9 @@ Key procs
 
 /datum/language_holder/ethereal
 	understood_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
-								/datum/language/voltaic = list(LANGUAGE_ATOM))
+								/datum/language/draconic = list(LANGUAGE_ATOM))
 	spoken_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
-							/datum/language/voltaic = list(LANGUAGE_ATOM))
+							/datum/language/draconic = list(LANGUAGE_ATOM))
 
 /datum/language_holder/golem
 	understood_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
@@ -387,11 +391,35 @@ Key procs
 	spoken_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
 							/datum/language/shadowtongue = list(LANGUAGE_ATOM))
 
-/datum/language_holder/teshari
+/datum/language_holder/kepori
 	understood_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
-								/datum/language/schechi = list(LANGUAGE_ATOM))
+								/datum/language/teceti_unified = list(LANGUAGE_ATOM))
 	spoken_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
-							/datum/language/schechi = list(LANGUAGE_ATOM))
+							/datum/language/teceti_unified = list(LANGUAGE_ATOM))
+
+/datum/language_holder/vox
+	understood_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
+								/datum/language/vox_pidgin = list(LANGUAGE_ATOM))
+	spoken_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
+							/datum/language/vox_pidgin = list(LANGUAGE_ATOM))
+
+/datum/language_holder/mouse
+	understood_languages = list(/datum/language/mouse = list(LANGUAGE_ATOM))
+	spoken_languages = list(/datum/language/mouse = list(LANGUAGE_ATOM))
+
+/datum/language_holder/spider
+	understood_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
+								/datum/language/spider = list(LANGUAGE_ATOM),
+								/datum/language/buzzwords = list(LANGUAGE_ATOM))
+	spoken_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
+							/datum/language/spider = list(LANGUAGE_ATOM),
+							/datum/language/buzzwords = list(LANGUAGE_ATOM))
+
+/datum/language_holder/dwarf
+	understood_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
+								/datum/language/dwarf = list(LANGUAGE_ATOM))
+	spoken_languages = list(/datum/language/common = list(LANGUAGE_ATOM),
+							/datum/language/dwarf = list(LANGUAGE_ATOM))
 
 /datum/language_holder/empty
 	understood_languages = list()

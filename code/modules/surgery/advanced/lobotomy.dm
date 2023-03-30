@@ -25,7 +25,10 @@
 	name = "perform lobotomy"
 	implements = list(TOOL_SCALPEL = 85, /obj/item/melee/transforming/energy/sword = 55, /obj/item/kitchen/knife = 35,
 		/obj/item/shard = 25, /obj/item = 20)
-	time = 100
+	time = 10 SECONDS
+	preop_sound = 'sound/surgery/scalpel1.ogg'
+	success_sound = 'sound/surgery/scalpel2.ogg'
+	failure_sound = 'sound/surgery/organ2.ogg'
 	experience_given = MEDICAL_SKILL_ADVANCED //lose XP if you end up giving them bad traumas
 
 /datum/surgery_step/lobotomize/tool_check(mob/user, obj/item/tool)
@@ -45,7 +48,7 @@
 	target.cure_all_traumas(TRAUMA_RESILIENCE_LOBOTOMY)
 	if(target.mind && target.mind.has_antag_datum(/datum/antagonist/brainwashed))
 		target.mind.remove_antag_datum(/datum/antagonist/brainwashed)
-	switch(rand(1,4))//Now let's see what hopefully-not-important part of the brain we cut off
+	switch(rand(1,3))//Now let's see what hopefully-not-important part of the brain we cut off
 		if(1)
 			target.gain_trauma_type(BRAIN_TRAUMA_MILD, TRAUMA_RESILIENCE_MAGIC)
 			experience_given = MEDICAL_SKILL_ADVANCED*0.9

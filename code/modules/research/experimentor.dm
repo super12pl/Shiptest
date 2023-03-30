@@ -427,7 +427,7 @@
 		if(linked_console.linked_lathe)
 			var/datum/component/material_container/linked_materials = linked_console.linked_lathe.GetComponent(/datum/component/material_container)
 			for(var/material in exp_on.custom_materials)
-				linked_materials.insert_amount_mat( min((linked_materials.max_amount - linked_materials.total_amount), (exp_on.custom_materials[material])), material)
+				linked_materials.insert_amount_mat(min((linked_materials.max_amount - linked_materials.total_amount), (exp_on.custom_materials[material])), material)
 		if(prob(EFFECT_PROB_LOW) && criticalReaction)
 			visible_message("<span class='warning'>[src]'s crushing mechanism slowly and smoothly descends, flattening the [exp_on]!</span>")
 			new /obj/item/stack/sheet/plasteel(get_turf(pick(oview(1,src))))
@@ -669,7 +669,7 @@
 
 /obj/item/relic/proc/do_the_teleport(mob/user)
 	var/turf/userturf = get_turf(user)
-	if(loc == user && !is_centcom_level(userturf.z)) //Because Nuke Ops bringing this back on their shuttle, then looting the ERT area is 2fun4you!
+	if(loc == user && !is_centcom_level(userturf)) //Because Nuke Ops bringing this back on their shuttle, then looting the ERT area is 2fun4you!
 		visible_message("<span class='notice'>[src] twists and bends, relocating itself!</span>")
 		throwSmoke(userturf)
 		do_teleport(user, userturf, 8, asoundin = 'sound/effects/phasein.ogg', channel = TELEPORT_CHANNEL_BLUESPACE)
